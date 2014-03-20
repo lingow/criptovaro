@@ -1,4 +1,4 @@
-digivaro
+CriptoVaro
 ========
 
-DigiVaro Cryptocurrency
+CriptoVaro Cryptocurrency
