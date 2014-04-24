@@ -2,7 +2,13 @@ package criptovaro;
 
 import java.net.InetAddress;
 
-public class PeerManager extends Ledger {
+public class PeerManager {
+    
+    private Ledger l;
+
+    public PeerManager(Ledger l) {
+    }
+
     public void InsertPeer(Peer p) {
     }
 
@@ -18,5 +24,8 @@ public class PeerManager extends Ledger {
 
     public Peer[] substractPeers(Peer[] incomingPeerList) {
         return null;
+    }
+
+    public void getPeers() {
     }
 }

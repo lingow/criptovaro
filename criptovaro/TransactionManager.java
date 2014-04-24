@@ -1,6 +1,11 @@
 package criptovaro;
 
-public class TransactionManager extends Ledger {
+public class TransactionManager{
+    private Ledger l;
+
+    public TransactionManager(Ledger l) {
+    }
+
     public void insertTransaction(Transaction tran) {
     }
 

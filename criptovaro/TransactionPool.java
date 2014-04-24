@@ -3,7 +3,7 @@ package criptovaro;
 import java.util.Queue;
 
 public class TransactionPool {
-    private Queue<Transaction> pool;
+    private Set<Transaction> pool;
 
     public synchronized void addTransaction(Transaction tran) {
     }

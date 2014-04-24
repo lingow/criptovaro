@@ -5,7 +5,7 @@ public class BlockChain {
     private Block header;
     private int length;
 
-    public boolean rollbackBlock() {
+    public Transaction[] rollbackBlock() {
         return false;
     }
 

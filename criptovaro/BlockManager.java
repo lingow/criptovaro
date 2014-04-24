@@ -1,6 +1,11 @@
 package criptovaro;
 
-public class BlockManager extends TransactionManager {
+public class BlockManager {
+    private TransactionManager tm;
+
+    public BlockManager(Ledger l) {
+    }
+
     public void insertBlock(Block b) {
     }
 

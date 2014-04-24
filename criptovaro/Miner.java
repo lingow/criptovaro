@@ -11,8 +11,12 @@ public class Miner {
     private Peer[] peerCache;
     private boolean interruptWork;
 
-    private void init() {
+    private Miner() {
+        /*
+         * 
+         */
     }
+
 
     private void startTCPListener(int port, Miner owningMiner, TransactionPool pool) {
     }
@@ -28,5 +32,14 @@ public class Miner {
     }
 
     private void Work() {
+    }
+
+    private static void main(String[] argv) {
+    }
+
+    public void start() {
+    }
+
+    public void stop() {
     }
 }
