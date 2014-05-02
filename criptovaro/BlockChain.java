@@ -6,7 +6,7 @@ public class BlockChain {
     private int length;
 
     public Transaction[] rollbackBlock() {
-        return false;
+        return null;
     }
 
     public boolean appendBlock(Block b) {

@@ -1,6 +1,11 @@
 package criptovaro;
 
+import java.io.IOException;
+
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.net.Socket;
 
 public class Peer {
     private InetAddress iPAddress;
@@ -34,5 +39,9 @@ public class Peer {
 
     public boolean getReliable() {
         return false;
+    }
+
+    Socket createSocket() throws IOException {
+        return new Socket(iPAddress,port);
     }
 }

@@ -1,20 +1,26 @@
 package criptovaro;
 
 public class Miner {
-    private CriptoVNetwork nm;
     private boolean initialized;
     private Account currentAccount;
     private BlockChain bchain;
     private TransactionManager tm;
     private PeerManager pm;
     private TransactionPool pool;
-    private Peer[] peerCache;
     private boolean interruptWork;
+    private Peer me;
 
+    /**
+     * This attributes makes the miner a singleton
+     */
+    public static final Miner INSTANCE = new Miner();
+
+    /**
+     * If anyone wants to access the miner, they can do so by referring to Miner.INSTANCE. Not by calling the 
+     * constructor. This keeps the Miner a singleton class
+     */
     private Miner() {
-        /*
-         * 
-         */
+        
     }
 
 
