@@ -36,6 +36,6 @@ public class PeerManager {
         return null;
     }
 
-    public void getPeers() {
+    public void LoadPeers() {
     }
 }

@@ -20,4 +20,14 @@ public class BlockChain {
     public boolean containsBlock(byte[] blockHash) {
         return true;
     }
+    
+    public BlockChain()
+    {
+        //Set block header here    
+    }
+    
+    public Block getBlockHeader()
+    {
+        return null;    
+    }
 }

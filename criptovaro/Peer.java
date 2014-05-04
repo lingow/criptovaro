@@ -44,4 +44,13 @@ public class Peer {
     Socket createSocket() throws IOException {
         return new Socket(iPAddress,port);
     }
+    
+    public Peer()
+    {}
+    
+    public Peer(InetAddress ip, int port)
+    {
+        this.iPAddress = ip;
+        this.port = port;
+    }
 }
