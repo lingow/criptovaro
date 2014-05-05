@@ -14,11 +14,13 @@ import java.net.Socket;
  * To run this thread use:
  * 
  * TCPListener.INSTANCE.setPort(port);
+ * TCPListener.INSTANCE.setTransactionPool(pool);
  * TCPListener.INSTANCE.start();
  */
 public class TCPListener extends Thread{
     private int port = 0;
-
+    private TransactionPool pool = null;
+    
     /**
      * This field makes TCPListener a singleton
      */
@@ -68,5 +70,10 @@ public class TCPListener extends Thread{
     public boolean setPort(int port){
         this.port=port;
         return true;
+    }
+    
+    public void setTransactionPool(TransactionPool thepool)
+    {
+        pool = thepool;
     }
 }
