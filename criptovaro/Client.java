@@ -2,6 +2,7 @@ package criptovaro;
 
 import java.math.BigDecimal;
 
+//Marco se la come 
 public class Client {
     private Wallet wallet;
     private BGProcessInfo httpd;
