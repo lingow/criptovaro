@@ -78,6 +78,7 @@ public class Transaction implements Serializable {
             
             //Add the data to verify
             oos.writeLong(timestamp.getTime());
+            oos.writeUTF(amount.toString());
             oos.write(source);
             oos.write(destination);
             oos.flush();
@@ -140,7 +141,9 @@ public class Transaction implements Serializable {
             timestamp = new Date(System.currentTimeMillis());
             oos.writeLong(timestamp.getTime());
             
-
+            //Write transaction amount
+            oos.writeUTF(amount.toString());
+            
             //Write source account bytes
             oos.write(source);
             

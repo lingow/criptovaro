@@ -3,6 +3,8 @@ package criptovaro;
 import java.io.*;
 import java.security.*;
 
+import sun.misc.BASE64Decoder;
+
 public class Account 
 {
     private String nickname;
@@ -54,6 +56,10 @@ public class Account
         catch (UnsupportedEncodingException e) 
         {
             e.printStackTrace();
+        } 
+        catch (IOException e) 
+        {
+            e.printStackTrace();
         }
     }
     
@@ -63,10 +69,11 @@ public class Account
         this.publicKey = public_key;
     }
     
-    public void setKeys(String public_key, String private_key) throws UnsupportedEncodingException
+    public void setKeys(String public_key, String private_key) throws IOException 
     {
-        this.publicKey = public_key.getBytes("UTF8");
-        this.privateKey = private_key.getBytes("UTF8");
+        BASE64Decoder decoder = new BASE64Decoder();
+        this.publicKey = decoder.decodeBuffer(public_key);
+        this.privateKey = decoder.decodeBuffer(private_key);
     }
     
     public byte[] getPublicKey()
