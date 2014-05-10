@@ -4,6 +4,8 @@ import java.io.File;
 
 import java.io.IOException;
 
+import java.math.BigDecimal;
+
 import java.net.Inet4Address;
 import java.net.InetAddress;
 
@@ -83,48 +85,6 @@ public class Miner {
     }
 
     private void Work() {
-    }
-
-    public static void main(String[] args)
-    {
-        Miner theMiner = Miner.INSTANCE;
-        byte[] pubkey = null;
-        byte[] privkey = null;
-        int tcp_port = 0;
-        int web_port = 0;
-        
-        //Get the Miner parameters, otherwise exit
-        //TODO: Validate input.
-        for(int i=0; i < args.length; i++)
-        {
-            String s = args[i];
-            
-            switch(s.toLowerCase())
-            {
-                case "-public_key": pubkey = args[i+1].getBytes(); 
-                                    break;
-                case "-private_key":    privkey = args[i+1].getBytes();
-                                        break;
-                case "-tcp_port":   tcp_port = Integer.parseInt(args[i+1]);
-                                    break;
-                case "web_port":    web_port = Integer.parseInt(args[i+1]);
-                                    break;
-                default: break;
-            };
-        }
-        
-        if(pubkey == null || privkey == null || tcp_port <= 0 || web_port <= 0)
-            return;
-                                      
-        try
-        {
-            theMiner.start(new Account(pubkey, privkey), tcp_port, web_port);
-        }
-        catch(Exception e)
-        {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
-        }
     }
     
     public void start(Account minerAccount, int tcp_port, int web_port)
@@ -249,6 +209,7 @@ public class Miner {
         }
         catch (Exception e)
         {
+            System.out.println(e.toString());
             e.printStackTrace();
         }
         
@@ -258,6 +219,75 @@ public class Miner {
     private boolean PeerDiscovery()
     {
         return true;    
+    }
+
+    public static void main(String[] args)
+    {
+        //Account-transaction test case. Should be moved into a unit test.
+        //Make a transaction from account ORIGIN to account DESTINATION of 100 CV, using 2 inputs of 50 and 80 CV respectively.
+        //Expected result: Successful transaction with an output of the reminder 30 CV to account 1
+        //Test inputs: 2 ficticious transaction from PAST account to ORIGIN account.
+        Account acc1 = new Account();
+        acc1.setNickname("ORIGIN_ACCOUNT");
+        acc1.generateKeys();
+        
+        Account acc2 = new Account();
+        acc2.setNickname("DESTINATION_ACCOUNT");
+        acc2.generateKeys();
+        
+        Account acc3 = new Account();
+        acc3.setNickname("PAST_ACCOUNT");
+        acc3.generateKeys();
+        
+        Transaction t = new Transaction(acc1.getPublicKey(), acc2.getPublicKey(), BigDecimal.valueOf(100));
+        t.addInput(new Transaction(acc3.getPublicKey(), acc1.getPublicKey(), BigDecimal.valueOf(50)));
+        t.addInput(new Transaction(acc3.getPublicKey(), acc1.getPublicKey(), BigDecimal.valueOf(80)));
+        if(t.Sign(acc1)) //Change this for an assert on unit test
+            System.out.println("Transaction successfully signed!!");
+        
+        if(t.verify()) 
+            System.out.println("Transaction successfully verified!");
+        
+        //End of test case
+        
+        Miner theMiner = Miner.INSTANCE;
+        String pubkey = null;
+        String privkey = null;
+        int tcp_port = 0;
+        int web_port = 0;
+        
+        //Get the Miner parameters, otherwise exit
+        //TODO: Validate input.
+        for(int i=0; i < args.length; i++)
+        {
+            String s = args[i];
+            
+            switch(s.toLowerCase())
+            {
+                case "-public_key": pubkey = args[i+1]; 
+                                    break;
+                case "-private_key":    privkey = args[i+1];
+                                        break;
+                case "-tcp_port":   tcp_port = Integer.parseInt(args[i+1]);
+                                    break;
+                case "web_port":    web_port = Integer.parseInt(args[i+1]);
+                                    break;
+                default: break;
+            };
+        }
+        
+        if(pubkey == null || privkey == null || tcp_port <= 0 || web_port <= 0)
+            return;
+                                      
+        try
+        {
+            theMiner.start(new Account(pubkey, privkey), tcp_port, web_port);
+        }
+        catch(Exception e)
+        {
+            System.out.println(e.getMessage());
+            e.printStackTrace();
+        }
     }
 }
 
