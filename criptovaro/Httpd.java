@@ -2,10 +2,12 @@ package criptovaro;
 
 public class Httpd extends Thread
 {
-    private BlockManager bm;
-    private TransactionManager tm;
-    private PeerManager pm;
-    
+    private int port;
+
+    Httpd(int web_port) {
+        this.port=web_port;
+    }
+
     public void run()
     {
         

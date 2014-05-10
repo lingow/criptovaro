@@ -1,14 +1,21 @@
 package criptovaro;
 
+import java.io.BufferedReader;
 import java.io.File;
 
 import java.io.IOException;
 
+import java.io.InputStreamReader;
+
 import java.net.Inet4Address;
 import java.net.InetAddress;
 
+import java.net.MalformedURLException;
 import java.net.NetworkInterface;
 
+import java.net.URL;
+
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
@@ -29,8 +36,7 @@ public class Miner {
     private TransactionPool pool;
     private boolean interruptWork;
     private boolean stopMiner = true; //DEBUG: set to false when ready to test for real. We really need an interface to stop a miner.
-    private Peer me;
-    private Logger log;
+    static protected Logger LOG;
     private FileHandler logFile;
     private TCPListener listener = null;
     private Httpd webServer = null;
@@ -57,19 +63,15 @@ public class Miner {
             int day = c.get(Calendar.DAY_OF_MONTH);
             logFile = new FileHandler(curDir + File.separator + Miner.class.getName() + "_" + year + "-" + 
                                       month + "-" + day +".log");
-            log = Logger.getLogger(Miner.class.getName());
+            LOG = Logger.getLogger(Miner.class.getName());
             logFile.setFormatter(new SimpleFormatter());
-            log.addHandler(logFile);
-            log.setLevel(Level.ALL);
+            LOG.addHandler(logFile);
+            LOG.setLevel(Level.ALL);
         }
         catch(IOException e)
         {
             System.out.println(e.toString());    
         }
-    }
-
-
-    private void startTCPListener(int port, Miner owningMiner, TransactionPool pool) {
     }
 
     private void Update() {
@@ -107,7 +109,7 @@ public class Miner {
                                         break;
                 case "-tcp_port":   tcp_port = Integer.parseInt(args[i+1]);
                                     break;
-                case "web_port":    web_port = Integer.parseInt(args[i+1]);
+                case "-web_port":    web_port = Integer.parseInt(args[i+1]);
                                     break;
                 default: break;
             };
@@ -129,7 +131,7 @@ public class Miner {
     
     public void start(Account minerAccount, int tcp_port, int web_port)
     {
-        log.log(Level.FINE, "Enter start method.");
+        LOG.log(Level.FINE, "Enter start method.");
         int setupCounter = 0;
         
         //Set the current account
@@ -138,7 +140,7 @@ public class Miner {
         //Init the miner.    
         do
         {
-            Init(tcp_port, web_port);
+            init(tcp_port, web_port);
             setupCounter++;
         }
         while(!this.initialized && setupCounter < 3);
@@ -162,7 +164,7 @@ public class Miner {
             }
         }
         
-        log.log(Level.FINE, "Exit start method.");
+        LOG.log(Level.FINE, "Exit start method.");
     }
 
     //TODO: Who can actually call this method? The only other threads on this jvm process are the state-less http daemon and the tcp listener and since it only reacts to network messages,
@@ -173,91 +175,34 @@ public class Miner {
     }
     
     //TODO: Change all steps of this method to be boolean operations such that if one fais, we can set the flag to false.
-    private void Init(int tcp_port, int web_port)
+    private void init(int tcp_port, int web_port)
     {
         boolean result = false;
         
-        log.log(Level.INFO, "Entering Miner initialization.");
-        
-        //Get Peer list
-        this.pm = PeerManager.INSTANCE;
-        pm.LoadPeers();
+        LOG.log(Level.INFO, "Entering Miner initialization.");
+        Ledger.INSTANCE.init();
         
         //Update current block header
         this.bchain = new BlockChain();
      
         //Crate the Transaction Pool
         this.pool = new TransactionPool();
-        
-        //Get my ip address
-        //TODO: Move the getMyIpAddress method to a more suitable class.
-        InetAddress myip = getMyIPAddress();
-        
-        //Add myselt to peer list
-        Peer me = new Peer(myip, tcp_port);
-        pm.AddPeer(me);
-        
+          
         //Spawn tcp listener
-        listener = TCPListener.INSTANCE;
-        listener.setPort(tcp_port);
-        listener.setTransactionPool(pool);
+        listener = new TCPListener(tcp_port);
         listener.start();
         
         //Spawn http server
-        webServer = new Httpd();
+        webServer = new Httpd(web_port);
         webServer.start();
         
-        //Peer discovery
-        result &= PeerDiscovery();
+        //Initialize PeerManager
+        PeerManager.INSTANCE.init();
         
         //Set init ready flag
         this.initialized = result;
             
-        log.log(Level.INFO, "Exiting miner intialization.");
-    }
-    
-    private InetAddress getMyIPAddress()
-    {
-        InetAddress res = null;
-        try
-        {
-            String localhost = InetAddress.getLocalHost().getHostAddress();
-            Enumeration<NetworkInterface> e = NetworkInterface.getNetworkInterfaces();
-            
-            while(e.hasMoreElements())
-            {
-                NetworkInterface ni = (NetworkInterface) e.nextElement();
-                
-                if(ni.isLoopback())
-                    continue;
-                if(ni.isPointToPoint())
-                    continue;
-                
-                Enumeration<InetAddress> addresses = ni.getInetAddresses();
-                while(addresses.hasMoreElements())
-                {
-                    InetAddress address = (InetAddress) addresses.nextElement();
-                    
-                    if(address instanceof Inet4Address)
-                    {
-                        String ip = address.getHostAddress();
-                        if(!ip.equals(localhost))
-                            res = address;
-                    }
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-        
-        return res;
-    }
-    
-    private boolean PeerDiscovery()
-    {
-        return true;    
+        LOG.log(Level.INFO, "Exiting miner intialization.");
     }
 }
 

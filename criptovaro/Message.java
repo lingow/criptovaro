@@ -24,14 +24,13 @@ public abstract class Message implements Serializable{
      * Make sure to fill in this Message's attributes before sending it.
      * 
      * @param p The peer to which this Message will be sent
-     * @throws IOException
      */
-    public void send(Peer p) throws IOException {
+    public void send(Peer p){
        try {
             Socket s = p.createSocket();
             this.send(p, s);
             s.close();
-        } catch (ConnectException ce) {
+        } catch (Exception ce) {
             PeerManager.INSTANCE.deletePeer(p);
         }
     }
@@ -43,9 +42,8 @@ public abstract class Message implements Serializable{
      * override this method by the Request class
      * @param p The peer from which this message came from
      * @param s The open socket by which this message came from
-     * @throws IOException
      */
-    public void receive(Peer p, @SuppressWarnings("unused") Socket s) throws IOException{
+    public void receive(Peer p, @SuppressWarnings("unused") Socket s){
         if ( ! this.deliver(p) )
             PeerManager.INSTANCE.deletePeer(p);
     }
@@ -54,13 +52,9 @@ public abstract class Message implements Serializable{
      * This method invokes the send method for each Peer in the collection
      * @param peers A collection of peers to which this message should be sent.
      */
-    public void bcast(Collection<Peer> peers){
-        for(Peer p: peers){
-            try {
+    public void bcast(){
+        for(Peer p: PeerManager.INSTANCE.getPeers()){
                 this.send(p);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
         }
     }
 
@@ -76,13 +70,10 @@ public abstract class Message implements Serializable{
      * This is a generalized method to send this message to a peer using an already open socket
      * @param p the peer to which this message should be sent
      * @param s the socket by which this message will be sent. It should be open before invoking this method.
+     * @throws IOException If the server is not reading from this socket
      */
-    protected void send(Peer p, Socket s){
-        try {
+    protected void send(Peer p, Socket s) throws IOException {
             ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
             oos.writeObject(this);
-        } catch (Exception e) {
-            PeerManager.INSTANCE.deletePeer(p);
-        }
     }
 }

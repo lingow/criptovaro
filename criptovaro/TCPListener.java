@@ -8,29 +8,23 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 /**
- * TCPListener is a Singleton Thread that listens for Socket connections of a specified port.
+ * TCPListener is a Thread that listens for Socket connections of a specified port.
  * It reads the Message objects and calls their receive method. It also adds peers to the peer cache as it receives 
  * any connections and removes them if any peer is not working the usual way.
  * To run this thread use:
  * 
- * TCPListener.INSTANCE.setPort(port);
- * TCPListener.INSTANCE.setTransactionPool(pool);
- * TCPListener.INSTANCE.start();
+ * listener = new TCPListener(port)
+ * listener.start();
  */
 public class TCPListener extends Thread{
     private int port = 0;
-    private TransactionPool pool = null;
-    
-    /**
-     * This field makes TCPListener a singleton
-     */
-    public static final TCPListener INSTANCE = new TCPListener();
 
     /**
-     * Because TCPListener, it should not be instantiated through the constructor
-     * Use TCPListener.INSTANCE instead. You must set the Port by calling setPort() before starting it though.
+     * Create a tcp listener ready to listen for the provided port
+     * @param port
      */
-    private TCPListener(){
+    public TCPListener(int port){
+        this.port=port;
     }
 
     /**
@@ -60,20 +54,5 @@ public class TCPListener extends Thread{
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    /**
-     * This method sets the listener port. Better use it before calling start() method
-     * @param port the port that should be set. 
-     * @return true if everything's ok. False if it's an invalid port.
-     */
-    public boolean setPort(int port){
-        this.port=port;
-        return true;
-    }
-    
-    public void setTransactionPool(TransactionPool thepool)
-    {
-        pool = thepool;
     }
 }
