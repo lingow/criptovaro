@@ -46,6 +46,8 @@
    <value n="defaultPackage" v="master"/>
    <hash n="oracle.ide.model.TechnologyScopeConfiguration">
       <list n="technologyScope">
+         <string v="Database"/>
+         <string v="Database-Modeling"/>
          <string v="Java"/>
          <string v="Java-Modeling"/>
       </list>
