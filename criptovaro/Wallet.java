@@ -21,4 +21,10 @@ public class Wallet {
     public Account[] getAccounts() {
         return null;
     }
+
+    void setWalletName(String walletName) {
+    }
+
+    void setWalletPath(String walletPath) {
+    }
 }
