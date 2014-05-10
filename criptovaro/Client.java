@@ -4,9 +4,9 @@ import java.math.BigDecimal;
 
 public class Client {
     private Wallet wallet;
-    private CriptoVNetwork nwmanager;
     private BGProcessInfo httpd;
     private BGProcessInfo[] miners;
+    private PeerManager pm;
 
     public boolean startHttpd(int port) {
         return false;

@@ -1,6 +1,7 @@
 package criptovaro;
 
 import java.util.Queue;
+import java.util.Set;
 
 public class TransactionPool {
     private Set<Transaction> pool;
