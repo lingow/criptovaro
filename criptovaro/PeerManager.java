@@ -68,8 +68,7 @@ public class PeerManager {
     public void init() {
         Miner.LOG.log(Level.FINE,"Initializing PeerManager");
         peerCache= Collections.synchronizedMap(new HashMap<InetSocketAddress,Peer>());
-        ArrayList<Peer> peerlist = Ledger.INSTANCE.q_PeerList();
-        for(Peer p : peerlist){
+        for(Peer p : Ledger.INSTANCE.q_PeerList()){
             addPeer(p);
         }
         (new GetPeersRequest()).bcast();

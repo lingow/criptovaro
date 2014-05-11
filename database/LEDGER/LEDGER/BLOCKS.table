@@ -1,0 +1,178 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<table xmlns="http://xmlns.oracle.com/jdeveloper/1211/offlinedb">
+  <name>BLOCKS</name>
+  <columns>
+    <column>
+      <name>BLOCKS_ID</name>
+      <dataTypeUsage>
+        <dataTypeID class="oracle.javatools.db.datatypes.DataTypeID">
+          <providerClass>oracle.javatools.db.sqlite.SQLiteDatabaseImpl</providerClass>
+          <typeName>NUMBER</typeName>
+        </dataTypeID>
+      </dataTypeUsage>
+      <notNull>true</notNull>
+    </column>
+    <column>
+      <name>PREVIOUS_BLOCK_ID</name>
+      <dataTypeUsage>
+        <dataTypeID class="oracle.javatools.db.datatypes.DataTypeID">
+          <providerClass>oracle.javatools.db.sqlite.SQLiteDatabaseImpl</providerClass>
+          <typeName>NUMBER</typeName>
+        </dataTypeID>
+      </dataTypeUsage>
+      <default class="java.lang.String">1</default>
+      <notNull>true</notNull>
+    </column>
+    <column>
+      <name>HASH</name>
+      <dataTypeUsage>
+        <attributeValues>
+          <entry>
+            <key>size</key>
+            <value class="java.lang.Long">32</value>
+          </entry>
+        </attributeValues>
+        <dataTypeID class="oracle.javatools.db.datatypes.DataTypeID">
+          <providerClass>oracle.javatools.db.sqlite.SQLiteDatabaseImpl</providerClass>
+          <typeName>RAW</typeName>
+        </dataTypeID>
+      </dataTypeUsage>
+      <notNull>true</notNull>
+    </column>
+    <column>
+      <name>LENGHT</name>
+      <dataTypeUsage>
+        <dataTypeID class="oracle.javatools.db.datatypes.DataTypeID">
+          <providerClass>oracle.javatools.db.sqlite.SQLiteDatabaseImpl</providerClass>
+          <typeName>NUMBER</typeName>
+        </dataTypeID>
+      </dataTypeUsage>
+      <notNull>true</notNull>
+    </column>
+    <column>
+      <name>SOLVERPUBLICKEY</name>
+      <dataTypeUsage>
+        <attributeValues>
+          <entry>
+            <key>size</key>
+            <value class="java.lang.Long">128</value>
+          </entry>
+        </attributeValues>
+        <dataTypeID class="oracle.javatools.db.datatypes.DataTypeID">
+          <providerClass>oracle.javatools.db.sqlite.SQLiteDatabaseImpl</providerClass>
+          <typeName>RAW</typeName>
+        </dataTypeID>
+      </dataTypeUsage>
+      <notNull>true</notNull>
+    </column>
+    <column>
+      <name>PROOF</name>
+      <dataTypeUsage>
+        <dataTypeID class="oracle.javatools.db.datatypes.DataTypeID">
+          <providerClass>oracle.javatools.db.sqlite.SQLiteDatabaseImpl</providerClass>
+          <typeName>NUMBER</typeName>
+        </dataTypeID>
+      </dataTypeUsage>
+      <notNull>true</notNull>
+    </column>
+  </columns>
+  <constraints>
+    <constraint class="oracle.javatools.db.FKConstraint">
+      <name>BLOCKS_PREVIOUS_BLOCK_ID</name>
+      <columnIDs>
+        <columnID class="oracle.javatools.db.NameBasedID">
+          <name>PREVIOUS_BLOCK_ID</name>
+          <parent class="oracle.javatools.db.NameBasedID">
+            <name>BLOCKS</name>
+            <schemaName>LEDGER</schemaName>
+            <type>TABLE</type>
+          </parent>
+          <schemaName>LEDGER</schemaName>
+          <type>COLUMN</type>
+        </columnID>
+      </columnIDs>
+      <enabled>true</enabled>
+      <referenceID class="oracle.javatools.db.NameBasedID">
+        <name>BLOCKS_PK</name>
+        <parent class="oracle.javatools.db.NameBasedID">
+          <name>BLOCKS</name>
+          <schemaName>LEDGER</schemaName>
+          <type>TABLE</type>
+        </parent>
+        <schemaName>LEDGER</schemaName>
+        <type>CONSTRAINT</type>
+      </referenceID>
+    </constraint>
+    <constraint class="oracle.javatools.db.PKConstraint">
+      <name>BLOCKS_PK</name>
+      <columnIDs>
+        <columnID class="oracle.javatools.db.NameBasedID">
+          <name>BLOCKS_ID</name>
+          <parent class="oracle.javatools.db.NameBasedID">
+            <name>BLOCKS</name>
+            <schemaName>LEDGER</schemaName>
+            <type>TABLE</type>
+          </parent>
+          <schemaName>LEDGER</schemaName>
+          <type>COLUMN</type>
+        </columnID>
+      </columnIDs>
+      <enabled>true</enabled>
+    </constraint>
+    <constraint class="oracle.javatools.db.UniqueConstraint">
+      <name>BLOCKS_UNIQUE_LENGHT</name>
+      <columnIDs>
+        <columnID class="oracle.javatools.db.NameBasedID">
+          <name>LENGHT</name>
+          <parent class="oracle.javatools.db.NameBasedID">
+            <name>BLOCKS</name>
+            <schemaName>LEDGER</schemaName>
+            <type>TABLE</type>
+          </parent>
+          <schemaName>LEDGER</schemaName>
+          <type>COLUMN</type>
+        </columnID>
+      </columnIDs>
+      <enabled>true</enabled>
+    </constraint>
+  </constraints>
+  <indexes>
+    <indexe>
+      <name>BLOCKS_INDEX1</name>
+      <columnExpressions>
+        <columnExpression>
+          <expressionSource>BLOCKS_ID</expressionSource>
+        </columnExpression>
+      </columnExpressions>
+      <indexType>NORMAL</indexType>
+      <schema>
+        <name>LEDGER</name>
+      </schema>
+    </indexe>
+    <indexe>
+      <name>BLOCKS_INDEX2</name>
+      <columnExpressions>
+        <columnExpression>
+          <expressionSource>HASH</expressionSource>
+        </columnExpression>
+        <columnExpression>
+          <expressionSource>LENGHT</expressionSource>
+          <orderType>DESC</orderType>
+        </columnExpression>
+      </columnExpressions>
+      <indexType>NORMAL</indexType>
+      <schema>
+        <name>LEDGER</name>
+      </schema>
+    </indexe>
+  </indexes>
+  <properties>
+    <entry>
+      <key>TableType</key>
+      <value class="oracle.javatools.db.Table$TableType">NORMAL</value>
+    </entry>
+  </properties>
+  <schema>
+    <name>LEDGER</name>
+  </schema>
+</table>

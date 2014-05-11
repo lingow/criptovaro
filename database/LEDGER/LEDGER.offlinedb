@@ -1,0 +1,18 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<ProviderSettings xmlns="http://xmlns.oracle.com/ide/hash">
+   <hash n="dataTypeSettings">
+      <value n="sourceKey" v="oracle.javatools.db.sqlite.SQLiteDatabaseImpl"/>
+   </hash>
+   <value n="domainName"/>
+   <value n="id" v="e36b88ec-1a08-4e96-9741-314410f75a0e"/>
+   <value n="name" v="LEDGER"/>
+   <value n="offlineDBSchema" v=""/>
+   <hash n="oracle.jdeveloper.offlinedb.model.ProviderDefaultTemplateSettings">
+      <hash n="default-template-ids">
+         <value n="SCHEMA" v="TEMPLATES"/>
+         <value n="TABLE" v="N:TABLE:TEMPLATE_TABLE1:SCHEMA:TEMPLATES"/>
+         <value n="TRIGGER" v="N:TRIGGER:TEMPLATE_TRIGGER1:SCHEMA:TEMPLATES"/>
+         <value n="VIEW" v="N:VIEW:TEMPLATE_VIEW1:SCHEMA:TEMPLATES"/>
+      </hash>
+   </hash>
+</ProviderSettings>

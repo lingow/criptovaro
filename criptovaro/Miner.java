@@ -160,7 +160,7 @@ public class Miner {
         PeerManager.INSTANCE.init();
         
         //Set init ready flag
-        this.initialized = result;
+        this.initialized = true;
             
         LOG.log(Level.INFO, "Exiting miner intialization.");
     }
