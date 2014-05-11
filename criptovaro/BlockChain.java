@@ -3,7 +3,7 @@ package criptovaro;
 public class BlockChain {
     private BlockManager bm;
     private Block header;
-    private int length;
+    private long length;
 
     public Transaction[] rollbackBlock() {
         return null;
@@ -30,4 +30,10 @@ public class BlockChain {
     {
         return null;    
     }
+
+    public long getLength() 
+    {
+        return length;
+    }
+
 }

@@ -47,6 +47,7 @@ public class TCPListener extends Thread{
                     m = (Message) ois.readObject();
                     if (p != null && m != null) 
                         m.receive(p,socket);
+                    
                 } catch (ClassNotFoundException e) {
                     PeerManager.INSTANCE.deletePeer(p);
                 }

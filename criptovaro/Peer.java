@@ -11,7 +11,9 @@ import java.net.UnknownHostException;
 public class Peer {
     private InetAddress iPAddress;
     private int port;
-
+    private long chain_length;
+    private byte[] bchain_head;
+    
     public void setPort(int port) {
         this.port=port;
     }
@@ -53,5 +55,25 @@ public class Peer {
      */
     public void updateTo(Peer p) {
         
+    }
+
+    public long getChain_length() 
+    {
+        return chain_length;
+    }
+
+    public void setChain_length(long chain_length) 
+    {
+        this.chain_length = chain_length;
+    }
+
+    public byte[] getBchain_head() 
+    {
+        return bchain_head;
+    }
+
+    public void setBchain_head(byte[] bchain_head) 
+    {
+        this.bchain_head = bchain_head;
     }
 }

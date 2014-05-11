@@ -5,7 +5,8 @@ public class BlockMessage extends Message{
     private static final long serialVersionUID = 9038440041760768863L;
 
     @Override
-    protected boolean deliver(Peer peer) {
+    protected boolean deliver(Peer peer) 
+    {
         // TODO Implement this method
         return false;
     }

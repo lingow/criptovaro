@@ -233,5 +233,10 @@ public static void main(String[] args)
             e.printStackTrace();
         }
     }
+
+    public synchronized long getBChainLenght()
+    {
+        return bchain.getLength();
+    }
 }
 
