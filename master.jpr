@@ -48,8 +48,11 @@
       <list n="technologyScope">
          <string v="Database"/>
          <string v="Database-Modeling"/>
+         <string v="HTML"/>
+         <string v="JAVASCRIPT"/>
          <string v="Java"/>
          <string v="Java-Modeling"/>
+         <string v="XML"/>
       </list>
    </hash>
    <hash n="oracle.jdeveloper.compiler.OjcConfiguration">
@@ -76,9 +79,9 @@
          <hash n="MinerTest">
             <value n="custom" v="false"/>
             <value n="name" v="MinerTest"/>
-            <value n="programArguments" v="-public_key a -private_key b -tcp_port 12345 -web_port 80"/>
+            <value n="programArguments" v="-public_key a -private_key b -tcp_port 12345 -web_port 8080"/>
             <url n="runDirectoryURL" path="../"/>
-            <value n="targetURL"/>
+            <url n="targetURL" path="criptovaro/Miner.java"/>
          </hash>
       </hash>
       <list n="runConfigurationList">

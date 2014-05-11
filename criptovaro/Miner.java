@@ -63,12 +63,14 @@ public class Miner {
             int year = c.get(Calendar.YEAR);
             int month = c.get(Calendar.MONTH) + 1; //Calendar months range 0-11
             int day = c.get(Calendar.DAY_OF_MONTH);
-            logFile = new FileHandler(curDir + File.separator + Miner.class.getName() + "_" + year + "-" + 
-                                      month + "-" + day +".log");
+            String fileName = curDir + File.separator + Miner.class.getName() + "_" + year + "-" + 
+                                      month + "-" + day +".log";
+            logFile = new FileHandler(fileName);
             LOG = Logger.getLogger(Miner.class.getName());
             logFile.setFormatter(new SimpleFormatter());
             LOG.addHandler(logFile);
             LOG.setLevel(Level.ALL);
+            LOG.log(Level.INFO, "Logging to file: " + fileName);
         }
         catch(IOException e)
         {
@@ -136,9 +138,7 @@ public class Miner {
     
     //TODO: Change all steps of this method to be boolean operations such that if one fais, we can set the flag to false.
     private void init(int tcp_port, int web_port)
-    {
-        boolean result = false;
-        
+    {        
         LOG.log(Level.INFO, "Entering Miner initialization.");
         Ledger.INSTANCE.init();
         
@@ -149,10 +149,12 @@ public class Miner {
         this.pool = new TransactionPool();
         
         //Spawn tcp listener
+        LOG.log(Level.INFO, "Starting tcp listener in port " + web_port);
         listener = new TCPListener(tcp_port);
         listener.start();
         
         //Spawn http server
+        LOG.log(Level.INFO, "Starting dashboard server in port " + web_port);
         webServer = new Httpd(web_port);
         webServer.start();
         
