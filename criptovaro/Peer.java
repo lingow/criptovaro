@@ -54,4 +54,8 @@ public class Peer {
     public void updateTo(Peer p) {
         
     }
+
+    public boolean equals(Peer p){
+        return this.getKey().equals(p.getKey());
+    }
 }
