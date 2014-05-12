@@ -1,6 +1,9 @@
 package criptovaro;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
 import java.io.File;
 
 import java.io.IOException;
@@ -8,6 +11,10 @@ import java.io.IOException;
 import java.math.BigDecimal;
 
 import java.io.InputStreamReader;
+
+import java.io.ObjectOutputStream;
+
+import java.lang.reflect.Array;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -17,10 +24,16 @@ import java.net.NetworkInterface;
 
 import java.net.URL;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.Random;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
@@ -42,7 +55,7 @@ public class Miner {
     private FileHandler logFile;
     private TCPListener listener = null;
     private Httpd webServer = null;
-    
+
     /**
      * This attributes makes the miner a singleton
      */
@@ -88,7 +101,127 @@ public class Miner {
         return null;
     }
 
-    private void Work() {
+    private void Work() 
+    {
+        try
+        {
+            Transaction newTran = null;
+            Block CurrentBlock = null;
+            boolean newTransAdded = false;
+            long currentProof = 0;
+            Random sr = new Random();
+            ByteArrayOutputStream theBytes = new ByteArrayOutputStream();
+            ObjectOutputStream oos =  new ObjectOutputStream(theBytes);
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] blockHash = null;
+            byte[] saltHash = null;
+            byte[] proofHash = null;
+            
+            //Not synchronized access to this variable, however it's fine since at most we'll spend one more cycle working. 
+            while(!this.interruptWork)
+            {
+                //Is this the first round for this block?
+                if(CurrentBlock == null)
+                {
+                    CurrentBlock = new Block();
+                    CurrentBlock.setPreviousBlock(bchain.getBlockHeader().getHash());
+                }
+                //Check if new transactions in the work pool.
+                newTran = null;
+                do
+                {
+                    newTran = this.pool.consumeTransaction(); //This returns null when no new transactions are available.    
+                    //If new transaction, validate it, then prepare it, then add it to the block.
+                    if(newTran != null)
+                    {
+                        boolean validTransaction = false;
+                        ArrayList<Transaction> funds = null;
+                        
+                        //Check that the transaction's signature and semantics are correct.
+                        if(tm.validateTransaction(newTran))
+                        {
+                            //First we check Ledger for unspent transactions to solvent this transaction
+                            funds = tm.getTransactionFunds(newTran);
+                                
+                            /*
+                             * If the ledger indicates there are not enough funds. Ideally we want to check the current 
+                             * block's transactions for funds as well, but the logic for multiple transactions getting 
+                             * funded from the current block can get messy. Add it as post-game.
+                             * TODO: Add logic such that a transaction can be funded from the current block's transactions.
+                             */
+                            if(funds != null)
+                                validTransaction = true;
+                        }
+                        
+                        //The transaction is golden. Added to the current block.
+                        if(validTransaction)
+                        {
+                            
+                            CurrentBlock.addTransaction(newTran);
+                            CurrentBlock.addFunds(funds);
+                            newTransAdded = true;
+                        }
+                    }
+                }
+                while(newTran != null);
+                
+                //Done with new transactions, now try to calculate the proof for this block.
+        
+                //If new transaction was added, reset the proof iterator to a new random.
+                if(newTransAdded)
+                {
+                    currentProof = sr.nextLong();
+                    newTransAdded = false;
+                }
+                
+                //Create SHA256 hash of proof and get bytes.
+                oos.writeLong(currentProof);
+                oos.flush();
+                md.update(theBytes.toByteArray());
+                saltHash = md.digest();
+                
+                //Get block bytes hash
+                CurrentBlock.setProof(currentProof);
+                blockHash = CurrentBlock.getHash();
+  
+                
+                //Create SHA256 hash of the whole data set
+                oos.write(blockHash);
+                oos.write(saltHash);
+                oos.flush();
+                md.update(theBytes.toByteArray());
+                proofHash = md.digest();
+                
+                ByteArrayInputStream bais = new ByteArrayInputStream(proofHash);
+                DataInputStream dis = new DataInputStream(bais);
+                
+                if(dis.readLong() < getProofTest())
+                {
+                    //We have a winner!
+                    //Commit Block
+                    //TODO: Broadast the result.
+                    //Create and broadcast prize transaction
+                    //TODO: Create prize transaction and broadcast it. This could have been added as part of the block,
+                    //      however, not sure how that would be validated by other miners...
+                }
+                else
+                {
+                    //Failed proof :( Incremente the proof and try again.
+                    currentProof++;
+                }
+            }
+            
+            //We have been signaled to stop working.
+        }
+        catch (IOException e) 
+        {
+            LOG.log(Level.INFO, e.toString());
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) 
+        {
+            LOG.log(Level.INFO, e.toString());
+            e.printStackTrace(); 
+        }
     }
 
     public void start(Account minerAccount, int tcp_port, int web_port)
@@ -234,6 +367,11 @@ public static void main(String[] args)
             System.out.println(e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    private long getProofTest()
+    {
+        return 0;    
     }
 }
 
