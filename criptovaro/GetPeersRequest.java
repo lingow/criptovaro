@@ -10,13 +10,11 @@ public class GetPeersRequest extends Request {
     
     @Override
     protected Message generateReply(Peer p) {
-        // TODO Implement this method
-        return null;
+        return new PeerListMessage(PeerManager.INSTANCE.getPeers());
     }
 
     @Override
     protected boolean deliver(Peer peer) {
-        // TODO Implement this method
-        return false;
+        return true;
     }
 }
