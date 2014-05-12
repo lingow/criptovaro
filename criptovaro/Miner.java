@@ -124,7 +124,10 @@ public class Miner {
                 if(CurrentBlock == null)
                 {
                     CurrentBlock = new Block();
-                    CurrentBlock.setPreviousBlock(bchain.getBlockHeader().getHash());
+                    if(bchain.getBlockHeader() != null)
+                        CurrentBlock.setPreviousBlock(bchain.getBlockHeader().getHash());
+                    else
+                    CurrentBlock.setPreviousBlock(null);
                 }
                 //Check if new transactions in the work pool.
                 newTran = null;
