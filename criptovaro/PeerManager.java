@@ -71,7 +71,15 @@ public class PeerManager {
         for(Peer p : Ledger.INSTANCE.q_PeerList()){
             addPeer(p);
         }
-        (new GetPeersRequest()).bcast();
+        for(ArrayList<Peer> arr : (new GetPeersRequest()).bcastRequest()){
+            if( arr != null){
+                for (Peer p: arr){
+                    if ( p != null){
+                        addPeer(p);
+                    }
+                }
+            }
+        }
         Miner.LOG.log(Level.FINE,"Successfully initialized PeerManager");
     }
 
@@ -91,5 +99,13 @@ public class PeerManager {
      */
     Peer getPeer(InetAddress inetAddress, int port) {
         return peerCache.get(new InetSocketAddress(inetAddress,port));
+    }
+
+    /**
+     * @return A randomly selected peer from those whith the highest lenght
+     */
+    public Peer getBestPeer() {
+        //TODO: Implement this method
+        return null;
     }
 }

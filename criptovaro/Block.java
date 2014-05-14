@@ -107,8 +107,13 @@ public class Block implements Serializable {
         return result;
     }
 
-    public int verify() {
-        return 0;
+    /**
+     * This Method uses the block's hash and proof to tell if the proof is satisfactory
+     * @return true if it matches. False if either the proof is incorrect or not set
+     */
+    public boolean verify() {
+        //TODO: Implement this Method
+        return false;
     }
 
     public boolean containsTransaction(Transaction tran) 
