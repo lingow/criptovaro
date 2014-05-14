@@ -28,7 +28,7 @@ public abstract class Message implements Serializable{
     public void send(Peer p){
        try {
             Socket s = p.createSocket();
-            this.send(p, s);
+            this.send(p, s,this);
             s.close();
         } catch (Exception ce) {
             PeerManager.INSTANCE.deletePeer(p);
@@ -70,10 +70,11 @@ public abstract class Message implements Serializable{
      * This is a generalized method to send this message to a peer using an already open socket
      * @param p the peer to which this message should be sent
      * @param s the socket by which this message will be sent. It should be open before invoking this method.
+     * @param obj the object to send
      * @throws IOException If the server is not reading from this socket
      */
-    protected void send(Peer p, Socket s) throws IOException {
+    protected static void send(Peer p, Socket s, Serializable obj) throws IOException {
             ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
-            oos.writeObject(this);
+            oos.writeObject(obj);
     }
 }

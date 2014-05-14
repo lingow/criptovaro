@@ -1,16 +1,22 @@
 package criptovaro;
 
-public class GetPeersRequest extends Request {
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+
+public class GetPeersRequest extends Request<ArrayList<Peer>> {
     @SuppressWarnings("compatibility:-1142199987874023273")
     private static final long serialVersionUID = 71876723107862001L;
-
-    public GetPeersRequest(){
-        super(PeerListMessage.class);
-    }
     
+    public GetPeersRequest(int t){
+        super(t);
+    }
+    public GetPeersRequest(){
+        super();
+    }
     @Override
-    protected Message generateReply(Peer p) {
-        return new PeerListMessage(PeerManager.INSTANCE.getPeers());
+    protected ArrayList<Peer> generateReply(Peer p) {
+        return new ArrayList<Peer>(PeerManager.INSTANCE.getPeers());
     }
 
     @Override

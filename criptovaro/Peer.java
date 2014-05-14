@@ -11,6 +11,8 @@ import java.net.UnknownHostException;
 public class Peer {
     private InetAddress iPAddress;
     private int port;
+    private byte[] hash;
+    private int lenght;
 
     public void setPort(int port) {
         this.port=port;
@@ -57,5 +59,22 @@ public class Peer {
 
     public boolean equals(Peer p){
         return this.getKey().equals(p.getKey());
+    }
+
+    public int getLenght() {
+        //TODO: Implement this method
+        return 0;
+    }
+
+    void setHash(byte[] hash) {
+        //TODO: Implement this method
+    }
+
+    void setlenght(int lenght) {
+        //TODO: Implement this method
+    }
+    
+    void setLenght(int lenght) {
+        //TODO: Implement this method
     }
 }
