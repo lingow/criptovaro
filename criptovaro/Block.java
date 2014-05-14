@@ -22,49 +22,62 @@ public class Block implements Serializable {
     private ArrayList<Transaction> funds;
     private long proof;
     private byte[] previousBlock;
-
+    private byte[] SolverPublicKey;
+    private long blockChainPosition;
+        
     public ArrayList<Transaction> getTransactions() 
     {
         return transactions;
     }
 
     public boolean addTransaction(Transaction tran)
-    {
-        boolean result = false;
-        
+    {   
         //Validate transaction signature
         if(!tran.verify())
         {
             Miner.LOG.log(Level.INFO, "Transaction verification failed. Not adding to block.");    
-            return result;
+            return false;
         }
         
         //Validate transaction semantics
-        if(!Arrays.equals(tran.getSource(), tran.getDestination()) || tran.getAmount().compareTo(BigDecimal.valueOf(0)) <= 0)
+        if(Arrays.equals(tran.getSource(), tran.getDestination()) || tran.getAmount().compareTo(BigDecimal.valueOf(0)) <= 0)
         {
             Miner.LOG.log(Level.INFO, "Transaction semantics are incorrect failed. Not adding to block.");    
-            return result;
+            return false;
         }
         
-        //Add transaction inputs
-        //Add transaciton outputs
+        transactions.add(tran);
         
-        return result;
+        return true;
     }
 
 
-    public byte[] getHash() throws IOException, NoSuchAlgorithmException 
+    public byte[] getHash()
     {
-        byte[] result;
+        
+        byte[] result = null;
         ByteArrayOutputStream theBytes = new ByteArrayOutputStream();
-        ObjectOutputStream oos =  new ObjectOutputStream(theBytes);
-        MessageDigest md = MessageDigest.getInstance("SHA-256");
-        
-        oos.writeObject(this);
-        oos.flush();
-        md.update(theBytes.toByteArray());
-        result = md.digest();
-        
+        ObjectOutputStream oos;
+        try 
+        {
+            oos = new ObjectOutputStream(theBytes);
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            
+            oos.writeObject(this);
+            oos.flush();
+            md.update(theBytes.toByteArray());
+            result = md.digest();
+        } 
+        catch (IOException e) 
+        {
+            Miner.LOG.log(Level.INFO, e.toString());
+            e.printStackTrace();
+        } 
+        catch (NoSuchAlgorithmException e) 
+        {
+            Miner.LOG.log(Level.INFO, e.toString());
+            e.printStackTrace();
+        }
         return result;
     }
 
@@ -83,28 +96,13 @@ public class Block implements Serializable {
     
     public Block()
     {
-        
+        transactions = new ArrayList<Transaction>();
     }
 
     public boolean compare(Block otherBlock) 
     {
-        boolean result = false;
-        try 
-        {
-            result =  Arrays.equals(this.getHash(), otherBlock.getHash());
-        } 
-        catch (NoSuchAlgorithmException e) 
-        {
-            Miner.LOG.log(Level.INFO, e.toString());
-            e.printStackTrace();
-        } 
-        catch (IOException e) 
-        {
-            Miner.LOG.log(Level.INFO, e.toString());
-            e.printStackTrace();
-        }
         
-        return result;
+        return  Arrays.equals(this.getHash(), otherBlock.getHash());
     }
 
     public int verify() {
@@ -163,5 +161,21 @@ public class Block implements Serializable {
     public long getProof() 
     {
         return proof;
+    }
+
+    public byte[] getSolverPublicKey() {
+        return SolverPublicKey;
+    }
+
+    public void setSolverPublicKey(byte[] SolverPublicKey) {
+        this.SolverPublicKey = SolverPublicKey;
+    }
+
+    public long getBlockChainPosition() {
+        return blockChainPosition;
+    }
+
+    public void setBlockChainPosition(long blockChainPosition) {
+        this.blockChainPosition = blockChainPosition;
     }
 }

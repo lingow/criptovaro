@@ -1,30 +1,52 @@
 package criptovaro;
 
+import java.sql.Connection;
+
+import java.sql.ResultSet;
+import java.sql.Statement;
+
 import java.util.ArrayList;
 
 public class TransactionManager{
-    private Ledger l;
 
-    public TransactionManager(Ledger l) {
+    public TransactionManager() 
+    {
     }
 
-    public void insertTransaction(Transaction tran) {
+    public void insertTransaction(Transaction tran) 
+    {
+        Connection c = null;
+        Statement stmt = null;
+        ResultSet rs = null;
+        StringBuilder query = new StringBuilder();
+        
     }
 
-    public void insertUnspentTransaction(Transaction tran) {
+    public void insertUnspentTransaction(Transaction tran) 
+    {
     }
 
-    public void deleteTrans(Transaction tran) {
+    public void deleteTrans(Transaction tran) 
+    {
     }
 
-    public void deleteUnspentTrans(Transaction tran) {
+    public void deleteUnspentTrans(Transaction tran) 
+    {
     }
 
-    public Transaction getTransaction(byte[] tranSignature) {
+    public Transaction getTransaction(byte[] tranSignature) 
+    {
+        Connection c = null;
+        Statement stmt = null;
+        ResultSet rs = null;
+        StringBuilder query = new StringBuilder();
+        
+        query.append("");
         return null;
     }
 
-    public Transaction getUnspentTransaction(byte[] tranSignature) {
+    public Transaction getUnspentTransaction(byte[] tranSignature) 
+    {
         return null;
     }
     
