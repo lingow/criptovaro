@@ -33,7 +33,7 @@ public class TransactionPool extends ConcurrentLinkedDeque<Transaction> {
         this.removeFirstOccurrence(transaction);
     }
     
-    public ArrayList<Transaction> cosumeAllTransaction()
+    public ArrayList<Transaction> getAllTransactions()
     {
         return null;    
     }

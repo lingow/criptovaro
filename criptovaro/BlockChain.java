@@ -30,17 +30,19 @@ public class BlockChain {
         return leftovers;
     }
 
-    public boolean appendBlock(Block b) 
-    {
-        boolean inserted = bm.insertBlock(b);
-        if (inserted){
-            blockChain.push(new BlockNode(blockChain.peek().lenght+1,b.getHash()));
     /**
      * Appends the block to the last position in the chain
      * @param b the block to append. It should be fully verified and complete. It will not be modified.
      * @return true if the block was correctly inserted
      */
-    }
+    public boolean appendBlock(Block b) 
+    {
+        boolean inserted = bm.insertBlock(b);
+        if (inserted)
+        {
+            blockChain.push(new BlockNode(blockChain.peek().lenght+1,b.getHash()));
+
+        }
         return inserted;
     }
 

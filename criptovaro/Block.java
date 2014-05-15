@@ -40,54 +40,51 @@ public class Block implements Serializable {
             boolean validTransaction = false;
             ArrayList<Transaction> funds = new ArrayList<Transaction>();
                 
-            //Check that the transaction's signature and semantics are correct.
-            if(newTran.verify())
+            //First we check Ledger for unspent transactions to solvent this transaction
+            ArrayList<Transaction> sourceFunds = unspentCache.get(newTran.getSource());
+            ArrayList<Transaction> destinationFunds = unspentCache.get(newTran.getDestination());
+            
+            if(sourceFunds == null)
             {
-                //First we check Ledger for unspent transactions to solvent this transaction
-                ArrayList<Transaction> sourceFunds = unspentCache.get(newTran.getSource());
-                ArrayList<Transaction> destinationFunds = unspentCache.get(newTran.getDestination());
-                
-                if(sourceFunds == null)
-                {
-                    sourceFunds = tm.getAccountFunds(newTran.getSource());
-                    unspentCache.put(newTran.getSource(), sourceFunds);
-        }
+                sourceFunds = tm.getAccountFunds(newTran.getSource());
+                unspentCache.put(newTran.getSource(), sourceFunds);
+            }
 
-                if(destinationFunds == null)
+            if(destinationFunds == null)
+            {
+                sourceFunds = tm.getAccountFunds(newTran.getSource());
+                unspentCache.put(newTran.getDestination(), destinationFunds);
+            }
+                
+            BigDecimal reminder = newTran.getAmount();
+            for(Transaction t : sourceFunds)
+            {
+                reminder.subtract(t.getAmount());
+                funds.add(t);
+                if(reminder.compareTo(BigDecimal.valueOf(0)) < 1)
                 {
-                    sourceFunds = tm.getAccountFunds(newTran.getSource());
-                    unspentCache.put(newTran.getDestination(), destinationFunds);
-                }
-                    
-                BigDecimal reminder = newTran.getAmount();
-                for(Transaction t : sourceFunds)
-                {
-                    reminder.subtract(t.getAmount());
-                    funds.add(t);
-                    if(reminder.compareTo(BigDecimal.valueOf(0)) < 1)
+                    //We have enough funds. Now need to check if exact amount or change is needed.
+                    if(reminder.compareTo(BigDecimal.valueOf(0)) != 0)
                     {
-                        //We have enough funds. Now need to check if exact amount or change is needed.
-                        if(reminder.compareTo(BigDecimal.valueOf(0)) != 0)
-                        {
-                            Transaction change = new Transaction(newTran.getDestination(), newTran.getSource(), reminder.abs());
-                            change.setOriginTransaction(newTran.getDigitalSignature());
-                            change.setType(TransactionType.CHANGE);
-                            this.transactions.add(change);
-                        }
-                        
-                        //Mark all the transactions that will fund this transactions as spent and remove them from the unspent cache
-                        for(Transaction f : funds)
-                        {
-                            f.setSpentBy(newTran.getDigitalSignature());
-                            sourceFunds.remove(f);
-                        }
-                        
-                        //We are done!
-                        validTransaction = true;
-                        break;
+                        Transaction change = new Transaction(newTran.getDestination(), newTran.getSource(), reminder.abs());
+                        change.setOriginTransaction(newTran.getDigitalSignature());
+                        change.setType(TransactionType.CHANGE);
+                        this.transactions.add(change);
                     }
+                    
+                    //Mark all the transactions that will fund this transactions as spent and remove them from the unspent cache
+                    for(Transaction f : funds)
+                    {
+                        f.setSpentBy(newTran.getDigitalSignature());
+                        sourceFunds.remove(f);
+                    }
+                    
+                    //We are done!
+                    validTransaction = true;
+                    break;
                 }
             }
+            
             
             //The transaction is golden. Added to the current block.
             if(validTransaction)
@@ -133,18 +130,19 @@ public class Block implements Serializable {
         return result;
     }
 
-    public void addTransactions(ArrayList<Transaction> trans, TransactionManager tm, HashMap<byte[], ArrayList<Transaction>> unspentCache) 
+    public void addTransactions(ArrayList<Transaction> trans, 
+                                                  TransactionManager tm, HashMap<byte[], ArrayList<Transaction>> unspentCache) 
     {
+    
         for(Transaction t : trans)
         {
-            this.addTransaction(t, tm, unspentCache);    
+          addTransaction(t, tm, unspentCache);
+
         }
+
     }
 
-    public Block(ArrayList<Transaction> trans, TransactionManager tm, HashMap<byte[], ArrayList<Transaction>> unspentCache) 
-    {
-        addTransactions(trans, tm, unspentCache);
-    }
+
     
     public Block()
     {

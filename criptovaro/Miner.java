@@ -158,10 +158,11 @@ public class Miner {
                         break;
                     }
                     
-                    Block b = new Block(peerBlock.getTransactions(), this.tm, unspentCache);
+                    Block b = new Block();
+                    b.addTransactions(peerBlock.getTransactions(), this.tm, unspentCache);
                     b.setProof(peerBlock.getProof());
                     b.setBlockChainPosition(peerBlock.getBlockChainPosition());
-                    
+                    b.setPrizeTransaction(new Transaction(peerBlock.getSolverPublicKey(), peerBlock.getSolverPublicKey(), BigDecimal.valueOf(100)));
                     if ( !b.verify()){
                         //The proof is wrong
                         failed=true;
@@ -241,20 +242,23 @@ public class Miner {
                 }
                 
                 //Check if new transactions in the work pool.
-                incomingTransactions = this.pool.cosumeAllTransaction();
+                incomingTransactions = this.pool.getAllTransactions();
                         
                 if(incomingTransactions != null)
                 {
                     CurrentBlock.addTransactions(incomingTransactions, this.tm, unspentTransCache);
+                    
+                    //Now remove them from the transaction pool
+                    this.pool.removeIfExist(CurrentBlock.getRegularTrans());
                     
                     //If new transaction was added, reset the proof iterator to a new random.
                     currentProof = sr.nextLong();
                 }
                         
                 //Done with new transactions, now try to calculate the proof for this block.
-                if(CurrentBlock.getTransactions().size() < 2 )
+                if(CurrentBlock.getTransactions().size() < 1 )
                 {
-                    //No work to be done, only prize transaction in the block. Sleep for some time and continue to the next iteration
+                    //No work to be done. Sleep for some time and continue to the next iteration
                     Thread.sleep(100);
                     continue;
                 }
@@ -289,6 +293,7 @@ public class Miner {
                     //TODO: Broadast the result.
                     
                     CurrentBlock = null;
+                    incomingTransactions = null;
                 }
                 else
                 {
