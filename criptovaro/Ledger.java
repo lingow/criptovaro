@@ -29,47 +29,39 @@ public class Ledger {
     
     private static final String[] createTableQueries = 
         {"CREATE TABLE IF NOT EXISTS BLOCKS \n" + 
-        "( BLOCKS_ID NUMBER NOT NULL \n" + 
-        ", PREVIOUS_BLOCK_ID NUMBER NOT NULL DEFAULT 1 \n" + 
-        ", HASH RAW(32) NOT NULL \n" + 
-        ", LENGHT NUMBER NOT NULL \n" + 
-        ", SOLVERPUBLICKEY RAW(128) NOT NULL \n" + 
+        "( BLOCK_ID INTEGER NOT NULL \n" + 
+        ", PREVIOUS_BLOCK_HASH VARCHAR(32) NOT NULL \n" + 
+        ", HASH VARCHAR(32) NOT NULL \n" + 
+        ", LENGTH NUMBER NOT NULL \n" + 
+        ", SOLVERPUBLICKEY VARCHAR(128) NOT NULL \n" + 
         ", PROOF NUMBER NOT NULL \n" + 
-        ", CONSTRAINT BLOCKS_PREVIOUS_BLOCK_ID FOREIGN KEY ( PREVIOUS_BLOCK_ID )\n" + 
-        "    REFERENCES BLOCKS ( BLOCKS_ID )\n" + 
+        "    REFERENCES BLOCKS ( BLOCK_ID )\n" + 
         "     \n" + 
-        ", CONSTRAINT BLOCKS_PK PRIMARY KEY ( BLOCKS_ID ) \n" + 
-        ", CONSTRAINT BLOCKS_UNIQUE_LENGHT UNIQUE ( LENGHT ) \n" + 
+        ", CONSTRAINT BLOCKS_PK PRIMARY KEY ( BLOCK_ID ) \n" + 
+        ", CONSTRAINT BLOCKS_UNIQUE_LENGTH UNIQUE ( LENGTH ) \n" + 
         ");\n" , 
-        "CREATE INDEX IF NOT EXISTS BLOCKS_INDEX1 ON BLOCKS ( BLOCKS_ID);\n" , 
-        "CREATE INDEX IF NOT EXISTS BLOCKS_INDEX2 ON BLOCKS ( HASH,  LENGHT DESC);\n" , 
+        "CREATE INDEX IF NOT EXISTS BLOCKS_INDEX1 ON BLOCKS ( BLOCK_ID);\n" , 
+        "CREATE INDEX IF NOT EXISTS BLOCKS_INDEX2 ON BLOCKS ( HASH,  LENGTH DESC);\n" , 
         "CREATE TABLE IF NOT EXISTS TRANSACTIONS \n" + 
-        "( TRANSACTIONS_ID NUMBER NOT NULL \n" + 
-        ", OWNING_BLOCK_ID NUMBER NOT NULL \n" + 
+        "( TRANSACTION_ID INTEGER NOT NULL \n" + 
+        ", OWNING_BLOCK_ID VARCHAR(128) NOT NULL \n" + 
         ", TRANSTYPE NUMBER NOT NULL \n" + 
-        ", ORIGINTRANS NUMBER \n" + 
-        ", FROMKEY RAW(128) NOT NULL \n" + 
-        ", TOKEY RAW(128) NOT NULL \n" + 
-        ", SALT RAW(8) NOT NULL \n" + 
-        ", AMMOUNT NUMBER NOT NULL \n" + 
-        ", SIGNATURE RAW(128) NOT NULL \n" + 
+        ", ORIGINTRANS VARCHAR(128) \n" + 
+        ", FROMKEY VARCHAR(128) NOT NULL \n" + 
+        ", TOKEY VARCHAR(128) NOT NULL \n" + 
+        ", AMOUNT NUMBER NOT NULL \n" + 
+        ", SIGNATURE VARCHAR(128) NOT NULL \n" + 
         ", TIMESTAMP TIMESTAMP NOT NULL \n" + 
-        ", spentby NUMBER \n" + 
-        ", CONSTRAINT TRANSACTIONS_ORIGINTRANS FOREIGN KEY ( TRANSACTIONS_ID )\n" + 
-        "    REFERENCES TRANSACTIONS ( TRANSACTIONS_ID )\n" + 
-        "    ON DELETE CASCADE \n" + 
+        ", spentby VARCHAR(128) \n" + 
         ", CONSTRAINT TRANSACTIONS_OWNING_BLOCK FOREIGN KEY ( OWNING_BLOCK_ID )\n" + 
-        "    REFERENCES BLOCKS ( BLOCKS_ID )\n" + 
+        "    REFERENCES BLOCKS ( BLOCK_ID )\n" + 
         "    ON DELETE CASCADE \n" + 
-        ", CONSTRAINT TRANSACTIONS_SPENTBY FOREIGN KEY ( TRANSACTIONS_ID )\n" + 
-        "    REFERENCES TRANSACTIONS ( TRANSACTIONS_ID )\n" + 
-        "    ON DELETE SET NULL \n" + 
-        ", CONSTRAINT TRANSACTIONS_PK PRIMARY KEY ( TRANSACTIONS_ID ) \n" + 
-        ", CONSTRAINT TRANSACTIONS_UK1 UNIQUE ( FROMKEY, SALT, TOKEY, AMMOUNT, SIGNATURE, TIMESTAMP ) \n" + 
+        ", CONSTRAINT TRANSACTIONS_PK PRIMARY KEY ( TRANSACTION_ID ) \n" + 
+        ", CONSTRAINT TRANSACTIONS_UK1 UNIQUE ( FROMKEY, TOKEY, AMOUNT, SIGNATURE, TIMESTAMP ) \n" + 
         ");",
-        "CREATE INDEX IF NOT EXISTS TRANSACTIONS_INDEX1 ON TRANSACTIONS ( TRANSACTIONS_ID);\n" , 
+        "CREATE INDEX IF NOT EXISTS TRANSACTIONS_INDEX1 ON TRANSACTIONS ( TRANSACTION_ID);\n" , 
         "CREATE INDEX IF NOT EXISTS TRANSACTIONS_INDEX2 ON TRANSACTIONS ( OWNING_BLOCK_ID);\n" , 
-        "CREATE INDEX IF NOT EXISTS TRANSACTIONS_INDEX3 ON TRANSACTIONS ( FROMKEY,  TOKEY,  SALT,  AMMOUNT,  TIMESTAMP);\n" , 
+        "CREATE INDEX IF NOT EXISTS TRANSACTIONS_INDEX3 ON TRANSACTIONS ( FROMKEY,  TOKEY,  AMOUNT,  TIMESTAMP);\n" , 
         "CREATE INDEX IF NOT EXISTS TRANSACTIONS_INDEX4 ON TRANSACTIONS ( spentby);\n" ,
         "CREATE TABLE IF NOT EXISTS PEERS \n" + 
         "( ip VARCHAR2(20) NOT NULL \n" + 
@@ -179,7 +171,7 @@ public class Ledger {
      * Make sure to then invoke the disconnect method on that connection when it will no longer be used
      * @return the Connection Object that represents the ledger in use
      */
-    private Connection connect() {
+    public Connection connect() {
         Connection c = null;
         Miner.LOG.log(Level.INFO, "Connecting to DB");
         try {
@@ -202,7 +194,7 @@ public class Ledger {
      * This method closes the passed connection in case that it's open
      * @param c the connection to close
      */
-    private void disconnect(Connection c) {
+    public void disconnect(Connection c) {
         try {
             if (!c.isClosed()) {
                 c.close();

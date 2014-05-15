@@ -102,17 +102,21 @@ public class Miner {
      * verifies it's not some malicious peer, and prepares a branch to merge it into the current block chain in order to
      * be in the latest block chain version.
      */
-    private void Update() {
+    private void Update() 
+    {
+        LOG.log(Level.INFO, "Miner entering update");
+                                                     
+        LOG.log(Level.INFO, "Exiting update process");
         while (true){
             Peer bestPeer = PeerManager.INSTANCE.getBestPeer();
             if (bestPeer == null){
                 //No peer is best peer. Start working
                 break;
-            }
+    }
             if (bchain.getLenght() < bestPeer.getLenght()){
                 // He Wins
                 LinkedHashMap<byte[],Integer> peerBranchHash = (new BranchRequest(bchain.getHash(),bchain.getLenght())).request(bestPeer);
-                
+
                 //First look for where we are in the incoming branch
                 int commonlenght=0;
                 for(BlockNode bn : bchain.getBackwardsBlockChain()){
@@ -200,6 +204,7 @@ public class Miner {
     {
         try
         {
+            LOG.log(Level.INFO, "Entering work loop.");
             Transaction newTran = null;
             Block CurrentBlock = null;
             boolean newTransAdded = false;
@@ -310,6 +315,7 @@ public class Miner {
             }
             
             //We have been signaled to stop working.
+            LOG.log(Level.INFO, "Exiting work loop.");
         }
         catch (IOException e) 
         {
@@ -342,10 +348,12 @@ public class Miner {
         Update();
         
         //Start work main loop.
-        while(true)
+        boolean debugCon = true;
+        while(debugCon)
         {
+            debugCon = false;
             //Will loop for new transactions until interruptWork is set.
-            Work(); 
+            //Work(); 
             
             //Listener received a stat message with a longer length. Update block chain.
             Update();
@@ -380,7 +388,7 @@ public class Miner {
         this.pool = new TransactionPool();
         
         //Spawn tcp listener
-        LOG.log(Level.INFO, "Starting tcp listener in port " + web_port);
+        LOG.log(Level.INFO, "Starting tcp listener in port " + tcp_port);
         listener = new TCPListener(tcp_port);
         listener.start();
         
@@ -416,16 +424,32 @@ public static void main(String[] args)
         acc3.setNickname("PAST_ACCOUNT");
         acc3.generateKeys();
         
-        Transaction t = new Transaction(acc1.getPublicKey(), acc2.getPublicKey(), BigDecimal.valueOf(100));
-        t.addInput(new Transaction(acc3.getPublicKey(), acc1.getPublicKey(), BigDecimal.valueOf(50)));
-        t.addInput(new Transaction(acc3.getPublicKey(), acc1.getPublicKey(), BigDecimal.valueOf(80)));
-        if(t.Sign(acc1)) //Change this for an assert on unit test
-            System.out.println("Transaction successfully signed!!");
+        Transaction t1 = new Transaction(acc1.getPublicKey(), acc2.getPublicKey(), BigDecimal.valueOf(100));
+        Transaction t2 = new Transaction(acc3.getPublicKey(), acc1.getPublicKey(), BigDecimal.valueOf(50));
+        Transaction t3 = new Transaction(acc3.getPublicKey(), acc1.getPublicKey(), BigDecimal.valueOf(80));
         
-        if(t.verify()) 
+        t1.setOriginTransaction(new byte[]{0,1}); //BUG:validate
+        t1.setSpentBy(new byte[]{0,1}); //BUG: validate
+        if(t1.Sign(acc1)) //Change this for an assert on unit test
+            System.out.println("Transaction successfully signed!!");
+        if(t1.verify()) 
             System.out.println("Transaction successfully verified!");
         
+        t2.setOriginTransaction(new byte[]{0,1}); //BUG:validate
+        t2.setSpentBy(new byte[]{0,1}); //BUG: validate
+        if(t2.Sign(acc3)) //Change this for an assert on unit test
+            System.out.println("Transaction successfully signed!!");
+        if(t2.verify()) 
+            System.out.println("Transaction successfully verified!");
+        
+        t3.setOriginTransaction(new byte[]{0,1}); //BUG:validate
+        t3.setSpentBy(new byte[]{0,1}); //BUG: validate
+        if(t3.Sign(acc3)) //Change this for an assert on unit test
+            System.out.println("Transaction successfully signed!!");
+        if(t3.verify()) 
+            System.out.println("Transaction successfully verified!");
         //End of test case
+        
         
         Miner theMiner = Miner.INSTANCE;
         String pubkey = null;
@@ -459,6 +483,20 @@ public static void main(String[] args)
         try
         {
             theMiner.start(new Account(pubkey, privkey), tcp_port, web_port);
+            
+            //BlockManaer test case
+            BlockManager bm = new BlockManager();
+            Block b = new Block();
+            if(!b.addTransaction(t1))
+                LOG.log(Level.INFO, "Failed to add transaction!");
+            if(!b.addTransaction(t2))
+                LOG.log(Level.INFO, "Failed to add transaction!");
+            if(!b.addTransaction(t3))
+                LOG.log(Level.INFO, "Failed to add transaction!");
+            b.setPreviousBlock(new byte[]{0,1});
+            b.setSolverPublicKey(acc1.getPublicKey());
+            bm.insertBlock(b);
+            //End BlockManager test case
         }
         catch(Exception e)
         {
@@ -476,11 +514,15 @@ public static void main(String[] args)
      * This method is called when any peer is notifying us their stat, probably proposing a new block solution
      * @param peer the peer which this stat is about. It was already added to the peerManager
      */
-    public void receivedStat(Peer peer) {
-        if (bchain.getLenght() < peer.getLenght()){
+    public void receivedStat(Peer peer) 
+    {
+        if (bchain.getLenght() < peer.getLenght())
+        {
             // He Wins
             toggleWork();
-        } else if (bchain.getLenght() > peer.getLenght()){
+        } 
+        else if (bchain.getLenght() > peer.getLenght())
+        {
             // I Win
             new StatMessage(bchain.getHash(),bchain.getLenght()).send(peer);
         }
