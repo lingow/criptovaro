@@ -28,6 +28,9 @@ public class Httpd extends Thread
         {
             server = HttpServer.create(new InetSocketAddress(port), connectionBacklog);
             server.createContext("/Dashboard", new DashboardHandler(dashboardPath));
+            server.createContext("/PeerData", new PeerHandler());
+            server.createContext("/BlockData", new BlockHandler());
+            server.createContext("/TransactionData", new TransactionHandler());
             server.setExecutor(null);
             server.start();
             
