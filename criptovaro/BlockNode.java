@@ -15,4 +15,8 @@ public class BlockNode {
     public BlockNode() {
         super();
     }
+    
+    public boolean equals(BlockNode b){
+        return this.lenght==b.lenght && this.hash.equals(b.hash); 
+    }
 }

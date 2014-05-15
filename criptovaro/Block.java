@@ -13,6 +13,7 @@ import java.security.NoSuchAlgorithmException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.logging.Level;
 
 public class Block implements Serializable {
@@ -148,7 +149,7 @@ public class Block implements Serializable {
         }
     }
 
-    public byte[] getPreviousBlock() 
+    public byte[] getPreviousBlockHash() 
     {
         return previousBlock;
     }
@@ -182,5 +183,10 @@ public class Block implements Serializable {
 
     public void setBlockChainPosition(long blockChainPosition) {
         this.blockChainPosition = blockChainPosition;
+    }
+
+    public Collection<Transaction> getRegularTrans() {
+        //TODO: Implement Method
+        return new ArrayList<Transaction>();
     }
 }
