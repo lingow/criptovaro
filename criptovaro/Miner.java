@@ -105,7 +105,6 @@ public class Miner {
     private void Update() 
     {
         LOG.log(Level.INFO, "Miner entering update");
-        HashMap<byte[], ArrayList<Transaction>> unspentCache = new HashMap<byte[], ArrayList<Transaction>>();
         
         LOG.log(Level.INFO, "Exiting update process");
         while (true){
@@ -117,7 +116,6 @@ public class Miner {
             if (bchain.getLenght() < bestPeer.getLength()){
                 // He Wins
                 LinkedHashMap<byte[],Integer> peerBranchHash = (new BranchRequest(bchain.getHash(),bchain.getLenght())).request(bestPeer);
-
                 //First look for where we are in the incoming branch
                 BlockNode commonNode = null;
                 for(BlockNode bn : bchain.getBackwardsBlockChain()){
@@ -144,6 +142,7 @@ public class Miner {
                 }
                 //Now start asking for blocks, verify them and add them to a list
                 LinkedHashMap<BlockNode,Block> peerBlocks = new LinkedHashMap<BlockNode,Block>(); //Just add them here if we already verified them
+                HashMap<byte[], ArrayList<Transaction>> unspentCache = new HashMap<byte[], ArrayList<Transaction>>();
                 boolean failed=true;
                 for( BlockNode bn : peerBranch){
                     Block peerBlock = (new BlockRequest(bn.hash, bn.lenght)).request(bestPeer);
@@ -159,9 +158,10 @@ public class Miner {
                     }
                     
                     Block b = new Block();
-                    b.addTransactions(peerBlock.getTransactions(), this.tm, unspentCache);
+                    b.addTransactions(peerBlock.getRegularTrans(), this.tm, unspentCache);
                     b.setProof(peerBlock.getProof());
                     b.setBlockChainPosition(peerBlock.getBlockChainPosition());
+                    b.setPreviousBlock(peerBlock.getPreviousBlockHash());
                     b.setPrizeTransaction(new Transaction(peerBlock.getSolverPublicKey(), peerBlock.getSolverPublicKey(), BigDecimal.valueOf(100)));
                     if ( !b.verify()){
                         //The proof is wrong

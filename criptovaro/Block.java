@@ -130,7 +130,7 @@ public class Block implements Serializable {
         return result;
     }
 
-    public void addTransactions(ArrayList<Transaction> trans, 
+    public void addTransactions(Collection<Transaction> trans, 
                                                   TransactionManager tm, HashMap<byte[], ArrayList<Transaction>> unspentCache) 
     {
     
