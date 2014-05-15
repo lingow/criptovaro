@@ -57,7 +57,7 @@ public abstract class Request<RequestedClass extends Serializable> extends Messa
         try {
             socket = peer.createSocket();
             this.expectrequest = true;
-            this.send(peer, socket,this);
+            Message.send(peer, socket,this);
             m = this.getReply(peer, socket, request_timeout);
             socket.close();
         } catch (Exception ce) {

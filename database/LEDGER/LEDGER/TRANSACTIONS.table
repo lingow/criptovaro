@@ -1,0 +1,581 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<table xmlns="http://xmlns.oracle.com/jdeveloper/1211/offlinedb">
+  <name>TRANSACTIONS</name>
+  <columns>
+    <column>
+      <name>TRANSACTION_ID</name>
+      <dataTypeUsage>
+        <dataTypeID class="oracle.javatools.db.datatypes.DataTypeID">
+          <providerClass>oracle.javatools.db.sqlite.SQLiteDatabaseImpl</providerClass>
+          <typeName>INTEGER</typeName>
+        </dataTypeID>
+      </dataTypeUsage>
+      <notNull>true</notNull>
+      <properties>
+        <entry>
+          <key>OfflineDBConstants.IMPORT_SOURCE_ID</key>
+          <value class="oracle.javatools.db.ReferenceID">
+            <name>TRANSACTION_ID</name>
+            <parent class="oracle.javatools.db.ReferenceID">
+              <name>TRANSACTIONS</name>
+              <schemaName>LEDGER</schemaName>
+              <type>TABLE</type>
+            </parent>
+            <type>COLUMN</type>
+          </value>
+        </entry>
+      </properties>
+    </column>
+    <column>
+      <name>OWNING_BLOCK_ID</name>
+      <dataTypeUsage>
+        <attributeValues>
+          <entry>
+            <key>size</key>
+            <value class="java.lang.Long">128</value>
+          </entry>
+        </attributeValues>
+        <dataTypeID class="oracle.javatools.db.datatypes.DataTypeID">
+          <providerClass>oracle.javatools.db.sqlite.SQLiteDatabaseImpl</providerClass>
+          <typeName>VARCHAR</typeName>
+        </dataTypeID>
+      </dataTypeUsage>
+      <notNull>true</notNull>
+      <properties>
+        <entry>
+          <key>OfflineDBConstants.IMPORT_SOURCE_ID</key>
+          <value class="oracle.javatools.db.ReferenceID">
+            <name>OWNING_BLOCK_ID</name>
+            <parent class="oracle.javatools.db.ReferenceID">
+              <name>TRANSACTIONS</name>
+              <schemaName>LEDGER</schemaName>
+              <type>TABLE</type>
+            </parent>
+            <type>COLUMN</type>
+          </value>
+        </entry>
+      </properties>
+    </column>
+    <column>
+      <name>TRANSTYPE</name>
+      <dataTypeUsage>
+        <dataTypeID class="oracle.javatools.db.datatypes.DataTypeID">
+          <providerClass>oracle.javatools.db.sqlite.SQLiteDatabaseImpl</providerClass>
+          <typeName>NUMBER</typeName>
+        </dataTypeID>
+      </dataTypeUsage>
+      <notNull>true</notNull>
+      <properties>
+        <entry>
+          <key>OfflineDBConstants.IMPORT_SOURCE_ID</key>
+          <value class="oracle.javatools.db.ReferenceID">
+            <name>TRANSTYPE</name>
+            <parent class="oracle.javatools.db.ReferenceID">
+              <name>TRANSACTIONS</name>
+              <schemaName>LEDGER</schemaName>
+              <type>TABLE</type>
+            </parent>
+            <type>COLUMN</type>
+          </value>
+        </entry>
+      </properties>
+    </column>
+    <column>
+      <name>ORIGINTRANS</name>
+      <dataTypeUsage>
+        <attributeValues>
+          <entry>
+            <key>size</key>
+            <value class="java.lang.Long">128</value>
+          </entry>
+        </attributeValues>
+        <dataTypeID class="oracle.javatools.db.datatypes.DataTypeID">
+          <providerClass>oracle.javatools.db.sqlite.SQLiteDatabaseImpl</providerClass>
+          <typeName>VARCHAR</typeName>
+        </dataTypeID>
+      </dataTypeUsage>
+      <notNull>false</notNull>
+      <properties>
+        <entry>
+          <key>OfflineDBConstants.IMPORT_SOURCE_ID</key>
+          <value class="oracle.javatools.db.ReferenceID">
+            <name>ORIGINTRANS</name>
+            <parent class="oracle.javatools.db.ReferenceID">
+              <name>TRANSACTIONS</name>
+              <schemaName>LEDGER</schemaName>
+              <type>TABLE</type>
+            </parent>
+            <type>COLUMN</type>
+          </value>
+        </entry>
+      </properties>
+    </column>
+    <column>
+      <name>FROMKEY</name>
+      <dataTypeUsage>
+        <attributeValues>
+          <entry>
+            <key>size</key>
+            <value class="java.lang.Long">128</value>
+          </entry>
+        </attributeValues>
+        <dataTypeID class="oracle.javatools.db.datatypes.DataTypeID">
+          <providerClass>oracle.javatools.db.sqlite.SQLiteDatabaseImpl</providerClass>
+          <typeName>VARCHAR</typeName>
+        </dataTypeID>
+      </dataTypeUsage>
+      <notNull>true</notNull>
+      <properties>
+        <entry>
+          <key>OfflineDBConstants.IMPORT_SOURCE_ID</key>
+          <value class="oracle.javatools.db.ReferenceID">
+            <name>FROMKEY</name>
+            <parent class="oracle.javatools.db.ReferenceID">
+              <name>TRANSACTIONS</name>
+              <schemaName>LEDGER</schemaName>
+              <type>TABLE</type>
+            </parent>
+            <type>COLUMN</type>
+          </value>
+        </entry>
+      </properties>
+    </column>
+    <column>
+      <name>TOKEY</name>
+      <dataTypeUsage>
+        <attributeValues>
+          <entry>
+            <key>size</key>
+            <value class="java.lang.Long">128</value>
+          </entry>
+        </attributeValues>
+        <dataTypeID class="oracle.javatools.db.datatypes.DataTypeID">
+          <providerClass>oracle.javatools.db.sqlite.SQLiteDatabaseImpl</providerClass>
+          <typeName>VARCHAR</typeName>
+        </dataTypeID>
+      </dataTypeUsage>
+      <notNull>true</notNull>
+      <properties>
+        <entry>
+          <key>OfflineDBConstants.IMPORT_SOURCE_ID</key>
+          <value class="oracle.javatools.db.ReferenceID">
+            <name>TOKEY</name>
+            <parent class="oracle.javatools.db.ReferenceID">
+              <name>TRANSACTIONS</name>
+              <schemaName>LEDGER</schemaName>
+              <type>TABLE</type>
+            </parent>
+            <type>COLUMN</type>
+          </value>
+        </entry>
+      </properties>
+    </column>
+    <column>
+      <name>AMOUNT</name>
+      <dataTypeUsage>
+        <dataTypeID class="oracle.javatools.db.datatypes.DataTypeID">
+          <providerClass>oracle.javatools.db.sqlite.SQLiteDatabaseImpl</providerClass>
+          <typeName>NUMBER</typeName>
+        </dataTypeID>
+      </dataTypeUsage>
+      <notNull>true</notNull>
+      <properties>
+        <entry>
+          <key>OfflineDBConstants.IMPORT_SOURCE_ID</key>
+          <value class="oracle.javatools.db.ReferenceID">
+            <name>AMOUNT</name>
+            <parent class="oracle.javatools.db.ReferenceID">
+              <name>TRANSACTIONS</name>
+              <schemaName>LEDGER</schemaName>
+              <type>TABLE</type>
+            </parent>
+            <type>COLUMN</type>
+          </value>
+        </entry>
+      </properties>
+    </column>
+    <column>
+      <name>SIGNATURE</name>
+      <dataTypeUsage>
+        <attributeValues>
+          <entry>
+            <key>size</key>
+            <value class="java.lang.Long">128</value>
+          </entry>
+        </attributeValues>
+        <dataTypeID class="oracle.javatools.db.datatypes.DataTypeID">
+          <providerClass>oracle.javatools.db.sqlite.SQLiteDatabaseImpl</providerClass>
+          <typeName>VARCHAR</typeName>
+        </dataTypeID>
+      </dataTypeUsage>
+      <notNull>true</notNull>
+      <properties>
+        <entry>
+          <key>OfflineDBConstants.IMPORT_SOURCE_ID</key>
+          <value class="oracle.javatools.db.ReferenceID">
+            <name>SIGNATURE</name>
+            <parent class="oracle.javatools.db.ReferenceID">
+              <name>TRANSACTIONS</name>
+              <schemaName>LEDGER</schemaName>
+              <type>TABLE</type>
+            </parent>
+            <type>COLUMN</type>
+          </value>
+        </entry>
+      </properties>
+    </column>
+    <column>
+      <name>TIMESTAMP</name>
+      <dataTypeUsage>
+        <dataTypeID class="oracle.javatools.db.datatypes.DataTypeID">
+          <providerClass>oracle.javatools.db.sqlite.SQLiteDatabaseImpl</providerClass>
+          <typeName>TIMESTAMP</typeName>
+        </dataTypeID>
+      </dataTypeUsage>
+      <notNull>true</notNull>
+      <properties>
+        <entry>
+          <key>OfflineDBConstants.IMPORT_SOURCE_ID</key>
+          <value class="oracle.javatools.db.ReferenceID">
+            <name>TIMESTAMP</name>
+            <parent class="oracle.javatools.db.ReferenceID">
+              <name>TRANSACTIONS</name>
+              <schemaName>LEDGER</schemaName>
+              <type>TABLE</type>
+            </parent>
+            <type>COLUMN</type>
+          </value>
+        </entry>
+      </properties>
+    </column>
+    <column>
+      <name>spentby</name>
+      <dataTypeUsage>
+        <attributeValues>
+          <entry>
+            <key>size</key>
+            <value class="java.lang.Long">128</value>
+          </entry>
+        </attributeValues>
+        <dataTypeID class="oracle.javatools.db.datatypes.DataTypeID">
+          <providerClass>oracle.javatools.db.sqlite.SQLiteDatabaseImpl</providerClass>
+          <typeName>VARCHAR</typeName>
+        </dataTypeID>
+      </dataTypeUsage>
+      <notNull>false</notNull>
+      <properties>
+        <entry>
+          <key>OfflineDBConstants.IMPORT_SOURCE_ID</key>
+          <value class="oracle.javatools.db.ReferenceID">
+            <name>spentby</name>
+            <parent class="oracle.javatools.db.ReferenceID">
+              <name>TRANSACTIONS</name>
+              <schemaName>LEDGER</schemaName>
+              <type>TABLE</type>
+            </parent>
+            <type>COLUMN</type>
+          </value>
+        </entry>
+      </properties>
+    </column>
+  </columns>
+  <constraints>
+    <constraint class="oracle.javatools.db.FKConstraint">
+      <name>TRANSACTIONS_OWNING_BLOCK</name>
+      <columnIDs>
+        <columnID class="oracle.javatools.db.NameBasedID">
+          <name>OWNING_BLOCK_ID</name>
+          <parent class="oracle.javatools.db.NameBasedID">
+            <name>TRANSACTIONS</name>
+            <schemaName>LEDGER</schemaName>
+            <type>TABLE</type>
+          </parent>
+          <schemaName>LEDGER</schemaName>
+          <type>COLUMN</type>
+        </columnID>
+      </columnIDs>
+      <enabled>true</enabled>
+      <onDeleteAction>CASCADE</onDeleteAction>
+      <properties>
+        <entry>
+          <key>OfflineDBConstants.IMPORT_SOURCE_ID</key>
+          <value class="oracle.javatools.db.ReferenceID">
+            <name>TRANSACTIONS_OWNING_BLOCK</name>
+            <childObjectNames>
+              <childObjectName>OWNING_BLOCK_ID</childObjectName>
+            </childObjectNames>
+            <parent class="oracle.javatools.db.ReferenceID">
+              <name>TRANSACTIONS</name>
+              <schemaName>LEDGER</schemaName>
+              <type>TABLE</type>
+            </parent>
+            <subType>FKConstraint</subType>
+            <type>CONSTRAINT</type>
+          </value>
+        </entry>
+      </properties>
+      <referenceID class="oracle.javatools.db.NameBasedID">
+        <name>BLOCKS_PK</name>
+        <parent class="oracle.javatools.db.NameBasedID">
+          <name>BLOCKS</name>
+          <schemaName>LEDGER</schemaName>
+          <type>TABLE</type>
+        </parent>
+        <schemaName>LEDGER</schemaName>
+        <type>CONSTRAINT</type>
+      </referenceID>
+    </constraint>
+    <constraint class="oracle.javatools.db.PKConstraint">
+      <name>TRANSACTIONS_PK</name>
+      <columnIDs>
+        <columnID class="oracle.javatools.db.NameBasedID">
+          <name>TRANSACTION_ID</name>
+          <parent class="oracle.javatools.db.NameBasedID">
+            <name>TRANSACTIONS</name>
+            <schemaName>LEDGER</schemaName>
+            <type>TABLE</type>
+          </parent>
+          <schemaName>LEDGER</schemaName>
+          <type>COLUMN</type>
+        </columnID>
+      </columnIDs>
+      <enabled>true</enabled>
+      <properties>
+        <entry>
+          <key>OfflineDBConstants.IMPORT_SOURCE_ID</key>
+          <value class="oracle.javatools.db.ReferenceID">
+            <name>TRANSACTIONS_PK</name>
+            <childObjectNames>
+              <childObjectName>TRANSACTION_ID</childObjectName>
+            </childObjectNames>
+            <parent class="oracle.javatools.db.ReferenceID">
+              <name>TRANSACTIONS</name>
+              <schemaName>LEDGER</schemaName>
+              <type>TABLE</type>
+            </parent>
+            <subType>PKConstraint</subType>
+            <type>CONSTRAINT</type>
+          </value>
+        </entry>
+      </properties>
+    </constraint>
+    <constraint class="oracle.javatools.db.UniqueConstraint">
+      <name>TRANSACTIONS_UK1</name>
+      <columnIDs>
+        <columnID class="oracle.javatools.db.NameBasedID">
+          <name>FROMKEY</name>
+          <parent class="oracle.javatools.db.NameBasedID">
+            <name>TRANSACTIONS</name>
+            <schemaName>LEDGER</schemaName>
+            <type>TABLE</type>
+          </parent>
+          <schemaName>LEDGER</schemaName>
+          <type>COLUMN</type>
+        </columnID>
+        <columnID class="oracle.javatools.db.NameBasedID">
+          <name>TOKEY</name>
+          <parent class="oracle.javatools.db.NameBasedID">
+            <name>TRANSACTIONS</name>
+            <schemaName>LEDGER</schemaName>
+            <type>TABLE</type>
+          </parent>
+          <schemaName>LEDGER</schemaName>
+          <type>COLUMN</type>
+        </columnID>
+        <columnID class="oracle.javatools.db.NameBasedID">
+          <name>AMOUNT</name>
+          <parent class="oracle.javatools.db.NameBasedID">
+            <name>TRANSACTIONS</name>
+            <schemaName>LEDGER</schemaName>
+            <type>TABLE</type>
+          </parent>
+          <schemaName>LEDGER</schemaName>
+          <type>COLUMN</type>
+        </columnID>
+        <columnID class="oracle.javatools.db.NameBasedID">
+          <name>SIGNATURE</name>
+          <parent class="oracle.javatools.db.NameBasedID">
+            <name>TRANSACTIONS</name>
+            <schemaName>LEDGER</schemaName>
+            <type>TABLE</type>
+          </parent>
+          <schemaName>LEDGER</schemaName>
+          <type>COLUMN</type>
+        </columnID>
+        <columnID class="oracle.javatools.db.NameBasedID">
+          <name>TIMESTAMP</name>
+          <parent class="oracle.javatools.db.NameBasedID">
+            <name>TRANSACTIONS</name>
+            <schemaName>LEDGER</schemaName>
+            <type>TABLE</type>
+          </parent>
+          <schemaName>LEDGER</schemaName>
+          <type>COLUMN</type>
+        </columnID>
+      </columnIDs>
+      <enabled>true</enabled>
+      <properties>
+        <entry>
+          <key>OfflineDBConstants.IMPORT_SOURCE_ID</key>
+          <value class="oracle.javatools.db.ReferenceID">
+            <name>TRANSACTIONS_UK1</name>
+            <childObjectNames>
+              <childObjectName>FROMKEY</childObjectName>
+              <childObjectName>TOKEY</childObjectName>
+              <childObjectName>AMOUNT</childObjectName>
+              <childObjectName>SIGNATURE</childObjectName>
+              <childObjectName>TIMESTAMP</childObjectName>
+            </childObjectNames>
+            <parent class="oracle.javatools.db.ReferenceID">
+              <name>TRANSACTIONS</name>
+              <schemaName>LEDGER</schemaName>
+              <type>TABLE</type>
+            </parent>
+            <subType>UniqueConstraint</subType>
+            <type>CONSTRAINT</type>
+          </value>
+        </entry>
+      </properties>
+    </constraint>
+  </constraints>
+  <indexes>
+    <indexe>
+      <name>TRANSACTIONS_INDEX1</name>
+      <columnExpressions>
+        <columnExpression>
+          <expressionSource>TRANSACTION_ID</expressionSource>
+        </columnExpression>
+      </columnExpressions>
+      <indexType>NORMAL</indexType>
+      <properties>
+        <entry>
+          <key>OfflineDBConstants.IMPORT_SOURCE_ID</key>
+          <value class="oracle.javatools.db.ReferenceID">
+            <name>TRANSACTIONS_INDEX1</name>
+            <parent class="oracle.javatools.db.ReferenceID">
+              <name>TRANSACTIONS</name>
+              <schemaName>LEDGER</schemaName>
+              <type>TABLE</type>
+            </parent>
+            <schemaName>LEDGER</schemaName>
+            <type>INDEX</type>
+          </value>
+        </entry>
+      </properties>
+      <schema>
+        <name>LEDGER</name>
+      </schema>
+    </indexe>
+    <indexe>
+      <name>TRANSACTIONS_INDEX2</name>
+      <columnExpressions>
+        <columnExpression>
+          <expressionSource>OWNING_BLOCK_ID</expressionSource>
+        </columnExpression>
+      </columnExpressions>
+      <indexType>NORMAL</indexType>
+      <properties>
+        <entry>
+          <key>OfflineDBConstants.IMPORT_SOURCE_ID</key>
+          <value class="oracle.javatools.db.ReferenceID">
+            <name>TRANSACTIONS_INDEX2</name>
+            <parent class="oracle.javatools.db.ReferenceID">
+              <name>TRANSACTIONS</name>
+              <schemaName>LEDGER</schemaName>
+              <type>TABLE</type>
+            </parent>
+            <schemaName>LEDGER</schemaName>
+            <type>INDEX</type>
+          </value>
+        </entry>
+      </properties>
+      <schema>
+        <name>LEDGER</name>
+      </schema>
+    </indexe>
+    <indexe>
+      <name>TRANSACTIONS_INDEX3</name>
+      <columnExpressions>
+        <columnExpression>
+          <expressionSource>FROMKEY</expressionSource>
+        </columnExpression>
+        <columnExpression>
+          <expressionSource>TOKEY</expressionSource>
+        </columnExpression>
+        <columnExpression>
+          <expressionSource>AMOUNT</expressionSource>
+        </columnExpression>
+        <columnExpression>
+          <expressionSource>TIMESTAMP</expressionSource>
+        </columnExpression>
+      </columnExpressions>
+      <indexType>NORMAL</indexType>
+      <properties>
+        <entry>
+          <key>OfflineDBConstants.IMPORT_SOURCE_ID</key>
+          <value class="oracle.javatools.db.ReferenceID">
+            <name>TRANSACTIONS_INDEX3</name>
+            <parent class="oracle.javatools.db.ReferenceID">
+              <name>TRANSACTIONS</name>
+              <schemaName>LEDGER</schemaName>
+              <type>TABLE</type>
+            </parent>
+            <schemaName>LEDGER</schemaName>
+            <type>INDEX</type>
+          </value>
+        </entry>
+      </properties>
+      <schema>
+        <name>LEDGER</name>
+      </schema>
+    </indexe>
+    <indexe>
+      <name>TRANSACTIONS_INDEX4</name>
+      <columnExpressions>
+        <columnExpression>
+          <expressionSource>spentby</expressionSource>
+        </columnExpression>
+      </columnExpressions>
+      <indexType>NORMAL</indexType>
+      <properties>
+        <entry>
+          <key>OfflineDBConstants.IMPORT_SOURCE_ID</key>
+          <value class="oracle.javatools.db.ReferenceID">
+            <name>TRANSACTIONS_INDEX4</name>
+            <parent class="oracle.javatools.db.ReferenceID">
+              <name>TRANSACTIONS</name>
+              <schemaName>LEDGER</schemaName>
+              <type>TABLE</type>
+            </parent>
+            <schemaName>LEDGER</schemaName>
+            <type>INDEX</type>
+          </value>
+        </entry>
+      </properties>
+      <schema>
+        <name>LEDGER</name>
+      </schema>
+    </indexe>
+  </indexes>
+  <properties>
+    <entry>
+      <key>OfflineDBConstants.IMPORT_SOURCE_CONNECTION</key>
+      <value class="java.lang.String">Ledger</value>
+    </entry>
+    <entry>
+      <key>OfflineDBConstants.IMPORT_SOURCE_ID</key>
+      <value class="oracle.javatools.db.ReferenceID">
+        <name>TRANSACTIONS</name>
+        <schemaName>LEDGER</schemaName>
+        <type>TABLE</type>
+      </value>
+    </entry>
+    <entry>
+      <key>TableType</key>
+      <value class="oracle.javatools.db.Table$TableType">NORMAL</value>
+    </entry>
+  </properties>
+  <schema>
+    <name>LEDGER</name>
+  </schema>
+</table>

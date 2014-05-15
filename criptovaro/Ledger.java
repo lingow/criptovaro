@@ -130,16 +130,15 @@ public class Ledger {
         Connection c = null;
         Statement stmt = null;
         String sql = "INSERT OR REPLACE INTO PEERS (IP,PORT) " +
-            "VALUES (" + p.getIPAddress().toString() + "," + p.getPort()+");";
+            "VALUES (" + p.getIPAddressString().toString() + "," + p.getPort()+");";
         c = connect();
         try {
             stmt = c.createStatement();        
             stmt.executeUpdate(sql);
             stmt.close();
-            c.commit();
         } catch (SQLException e) {
             Miner.LOG.log(Level.WARNING,
-                "Failed to insert a peer("+ p.getIPAddress().toString() + "," + p.getPort()+"): "+ e.getMessage());
+                "Failed to insert a peer("+ p.getIPAddressString().toString() + "," + p.getPort()+"): "+ e.getMessage());
         }
         disconnect(c);
     }
@@ -152,7 +151,7 @@ public class Ledger {
         Connection c = null;
         Statement stmt = null;
         String sql = "DELETE FROM PEERS WHERE " +
-            "IP=" + p.getIPAddress().toString() + " AND PORT=" + p.getPort()+";";
+            "IP=" + p.getIPAddressString().toString() + " AND PORT=" + p.getPort()+";";
         c = connect();
         try {
             stmt = c.createStatement();        
@@ -161,7 +160,7 @@ public class Ledger {
             c.commit();
         } catch (SQLException e) {
             Miner.LOG.log(Level.WARNING,
-                "Failed to delete a peer("+ p.getIPAddress().toString() + "," + p.getPort()+"): "+ e.getMessage());
+                "Failed to delete a peer("+ p.getIPAddressString().toString() + "," + p.getPort()+"): "+ e.getMessage());
         }
         disconnect(c);
     }
