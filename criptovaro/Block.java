@@ -71,6 +71,7 @@ public class Block implements Serializable {
                         {
                             Transaction change = new Transaction(newTran.getDestination(), newTran.getSource(), reminder.abs());
                             change.setOriginTransaction(newTran.getDigitalSignature());
+                            change.setType(TransactionType.CHANGE);
                             this.transactions.add(change);
                         }
                         

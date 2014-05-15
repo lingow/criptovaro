@@ -45,7 +45,8 @@ public class Transaction implements Serializable {
     private byte[] digitalSignature;
     private byte[] spentBy;
     private byte[] originTransaction;
-
+    private TransactionType type;
+    
     public Transaction(byte[] source, byte[] destination, BigDecimal amount)
     {
         this.source = source;
@@ -224,12 +225,17 @@ public class Transaction implements Serializable {
         this.spentBy = spentBy;
     }
 
-    public TransactionType getType() {
-        //TODO: Implement this Method
-        return null;
+    public TransactionType getType() 
+    {
+        return type;
     }
     
     public boolean equals(Transaction t ){
         return Arrays.equals(this.digitalSignature, t.getDigitalSignature());
+    }
+
+    public void setType(TransactionType type) 
+    {
+        this.type = type;
     }
 }
