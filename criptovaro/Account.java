@@ -29,8 +29,8 @@ public class Account
             PublicKey pubkey = kp.getPublic();
             
             //debug line
-            System.out.println("Private key encoding format: " + privkey.getFormat());
-            System.out.println("Public key encoding format: " + pubkey.getFormat());            
+            //System.out.println("Private key encoding format: " + privkey.getFormat());
+            //System.out.println("Public key encoding format: " + pubkey.getFormat());            
             //Save the bytes in the objects internal state.
             privateKey = privkey.getEncoded();
             publicKey = pubkey.getEncoded();

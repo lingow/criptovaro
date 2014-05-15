@@ -45,6 +45,8 @@ public class Transaction implements Serializable {
     private BigDecimal amount;
     private Date timestamp;
     private byte[] digitalSignature;
+    private byte[] spentBy;
+    private byte[] originTransaction;
 
     public Transaction(byte[] source, byte[] destination, BigDecimal amount)
     {
@@ -206,5 +208,29 @@ public class Transaction implements Serializable {
 
     public void setAmount(BigDecimal amount) {
         this.amount = amount;
+    }
+
+    public byte[] getOriginTransaction() {
+        return originTransaction;
+    }
+
+    public void setOriginTransaction(byte[] originTransaction) {
+        this.originTransaction = originTransaction;
+    }
+
+    public Date getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(Date timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public byte[] getSpentBy() {
+        return spentBy;
+    }
+
+    public void setSpentBy(byte[] spentBy) {
+        this.spentBy = spentBy;
     }
 }
