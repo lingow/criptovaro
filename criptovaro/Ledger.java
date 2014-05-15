@@ -136,7 +136,6 @@ public class Ledger {
             stmt = c.createStatement();        
             stmt.executeUpdate(sql);
             stmt.close();
-            c.commit();
         } catch (SQLException e) {
             Miner.LOG.log(Level.WARNING,
                 "Failed to insert a peer("+ p.getIPAddressString().toString() + "," + p.getPort()+"): "+ e.getMessage());

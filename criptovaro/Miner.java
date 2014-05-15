@@ -549,6 +549,6 @@ public static void main(String[] args)
 
     public void incomingTransaction(Transaction t) {
         pool.addTransaction(t);
-}
+    }
 }
 
