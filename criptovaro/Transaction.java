@@ -223,4 +223,9 @@ public class Transaction implements Serializable {
     public void setSpentBy(byte[] spentBy) {
         this.spentBy = spentBy;
     }
+
+    public TransactionType getType() {
+        //TODO: Implement this Method
+        return null;
+    }
 }

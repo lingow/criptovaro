@@ -105,7 +105,8 @@ public class Miner {
     private void Update() 
     {
         LOG.log(Level.INFO, "Miner entering update");
-                                                     
+        HashMap<byte[], ArrayList<Transaction>> unspentCache = new HashMap<byte[], ArrayList<Transaction>>();
+        
         LOG.log(Level.INFO, "Exiting update process");
         while (true){
             Peer bestPeer = PeerManager.INSTANCE.getBestPeer();
@@ -118,20 +119,26 @@ public class Miner {
                 LinkedHashMap<byte[],Integer> peerBranchHash = (new BranchRequest(bchain.getHash(),bchain.getLenght())).request(bestPeer);
 
                 //First look for where we are in the incoming branch
-                int commonlenght=0;
+                BlockNode commonNode = null;
                 for(BlockNode bn : bchain.getBackwardsBlockChain()){
                     Integer i = peerBranchHash.get(bn.hash);
                     if ( i != null){
-                        if (bn.lenght == i){
-                            commonlenght = i.intValue();
+                        BlockNode peerNode = new BlockNode(i,bn.hash);
+                        if (bn.equals(peerNode)){
+                            commonNode = bn;
                         }
                         break;
                     }
                 }
+                if (commonNode == null){
+                    //We are in completely different branches
+                    PeerManager.INSTANCE.deletePeer(bestPeer);
+                    continue;
+                }
                 //Now form the BlockNode list 
                 List<BlockNode> peerBranch = new ArrayList<>();
                 for(Map.Entry<byte[],Integer> entry:peerBranchHash.entrySet()){
-                    if ( entry.getValue().intValue() > commonlenght){
+                    if ( entry.getValue().intValue() > commonNode.lenght){
                         peerBranch.add(new BlockNode(entry.getValue().intValue(),entry.getKey()));
                     }
                 }
@@ -150,14 +157,11 @@ public class Miner {
                         failed=true;
                         break;
                     }
-                    Block b = prepareBlock(peerBlock.getTransactions(), peerBlock.getBlockChainPosition(), peerBlock.getPreviousBlock(),
-                                           new HashMap<byte[], ArrayList<Transaction>>());
-                    if (b == null){
-                        //Block is incorrectly formed
-                        failed=true;
-                        break;
-                    }
+                    
+                    Block b = new Block(peerBlock.getTransactions(), this.tm, unspentCache);
                     b.setProof(peerBlock.getProof());
+                    b.setBlockChainPosition(peerBlock.getBlockChainPosition());
+                    
                     if ( !b.verify()){
                         //The proof is wrong
                         failed=true;
@@ -177,8 +181,7 @@ public class Miner {
                     continue;
                 }
                 if (!peerBlocks.isEmpty()){
-                    bchain.merge(commonlenght,peerBlocks,pool);
-                    bchain.commitChain();
+                    bchain.merge(commonNode,peerBlocks,pool);
                     break;
                 } else {
                     //How did we even got here? It must be the peers fault! Burn the Witch!
@@ -217,7 +220,7 @@ public class Miner {
             byte[] saltHash = null;
             byte[] proofHash = null;
             HashMap<byte[], ArrayList<Transaction>> unspentTransCache = null;
-                
+            
             //Not synchronized access to this variable, however it's fine since at most we'll spend one more cycle working. 
             while(!this.interruptWork)
             {
@@ -228,31 +231,27 @@ public class Miner {
                     unspentTransCache = new HashMap<byte[], ArrayList<Transaction>>();
                     Transaction prize = new Transaction(this.currentAccount.getPublicKey(), this.currentAccount.getPublicKey(),BigDecimal.valueOf(100));
                     CurrentBlock.setPrizeTransaction(prize);
-                    if(bchain.getBlockHeader() != null)
+                    if(bchain.getHash() != null)
                     {
-                        CurrentBlock.setPreviousBlock(bchain.getBlockHeader().getHash());
+                        CurrentBlock.setPreviousBlock(bchain.getHash());
                         CurrentBlock.setBlockChainPosition(bchain.getLenght() + 1);
                     }
                     else
-                        CurrentBlock.setPreviousBlock(null);
+                    CurrentBlock.setPreviousBlock(null);
                 }
                 
                 //Check if new transactions in the work pool.
                 incomingTransactions = this.pool.cosumeAllTransaction();
-                
+                        
                 if(incomingTransactions != null)
                 {
-                    prepareBlock(incomingTransactions, CurrentBlock.getBlockChainPosition(), 
-                                                CurrentBlock.getPreviousBlock(), unspentTransCache);     
-                }
-                
-                //Done with new transactions, now try to calculate the proof for this block.
-                //If new transaction was added, reset the proof iterator to a new random.
-                if(incomingTransactions != null)
-                {
+                    CurrentBlock.addTransactions(incomingTransactions, this.tm, unspentTransCache);
+                    
+                    //If new transaction was added, reset the proof iterator to a new random.
                     currentProof = sr.nextLong();
                 }
-                
+                        
+                //Done with new transactions, now try to calculate the proof for this block.
                 if(CurrentBlock.getTransactions().size() < 2 )
                 {
                     //No work to be done, only prize transaction in the block. Sleep for some time and continue to the next iteration
@@ -314,7 +313,7 @@ public class Miner {
         {
             LOG.log(Level.INFO, e.toString());
             e.printStackTrace();
-        }
+    }
     }
 
     public void start(Account minerAccount, int tcp_port, int web_port)
@@ -474,15 +473,15 @@ public static void main(String[] args)
             theMiner.start(new Account(pubkey, privkey), tcp_port, web_port);
             
             //BlockManaer test case
-            BlockManager bm = new BlockManager();
-            Block b = new Block();
-            if(!b.addTransaction(t1))
-                LOG.log(Level.INFO, "Failed to add transaction!");
-            if(!b.addTransaction(t2))
-                LOG.log(Level.INFO, "Failed to add transaction!");
-            if(!b.addTransaction(t3))
-                LOG.log(Level.INFO, "Failed to add transaction!");
-            bm.insertBlock(b);
+//            BlockManager bm = new BlockManager();
+//            Block b = new Block();
+//            if(!b.addTransaction(t1))
+//                LOG.log(Level.INFO, "Failed to add transaction!");
+//            if(!b.addTransaction(t2))
+//                LOG.log(Level.INFO, "Failed to add transaction!");
+//            if(!b.addTransaction(t3))
+//                LOG.log(Level.INFO, "Failed to add transaction!");
+//            bm.insertBlock(b);
             //End BlockManager test case
         }
         catch(Exception e)
@@ -526,82 +525,6 @@ public static void main(String[] args)
         return null;
     }
 
-    /**
-     *  This Method creates a new block, of which the proof is not known, based on the transaction collection passed
-     *  to it. It adds the transaction to the block, finds the inputs and generates the outputs of every transaction it
-     *  will insert into it
-     * @param transactions A collection of  regular transactions from which the block should be formed
-     * @return The formed block, of which only the proof is missing
-     */
-    public Block prepareBlock(Collection<Transaction> transactions, long length, byte[] prevBlock, 
-                              HashMap<byte[],ArrayList<Transaction>> unspentCache) 
-    {
-        Block CurrentBlock = new Block();
-        for(Transaction newTran : transactions)
-        {
-            //If new transaction, validate it, then prepare it, then add it to the block.
-            if(newTran != null)
-            {
-                boolean validTransaction = false;
-                ArrayList<Transaction> funds = new ArrayList<Transaction>();
-                    
-                //Check that the transaction's signature and semantics are correct.
-                if(newTran.verify())
-                {
-                    //First we check Ledger for unspent transactions to solvent this transaction
-                    ArrayList<Transaction> sourceFunds = unspentCache.get(newTran.getSource());
-                    ArrayList<Transaction> destinationFunds = unspentCache.get(newTran.getDestination());
-                    
-                    if(sourceFunds == null)
-                    {
-                        sourceFunds = tm.getAccountFunds(newTran.getSource());
-                        unspentCache.put(newTran.getSource(), sourceFunds);
-                    }
-                    
-                    if(destinationFunds == null)
-                    {
-                        sourceFunds = tm.getAccountFunds(newTran.getSource());
-                        unspentCache.put(newTran.getDestination(), destinationFunds);
-                    }
-                        
-                    BigDecimal reminder = newTran.getAmount();
-                    for(Transaction t : sourceFunds)
-                    {
-                        reminder.subtract(t.getAmount());
-                        t.setSpentBy(newTran.getSource());
-                        funds.add(t);
-                        if(reminder.compareTo(BigDecimal.valueOf(0)) < 1)
-                        {
-                            //We have enough funds. Now need to check if exact amount or change is needed.
-                            if(reminder.compareTo(BigDecimal.valueOf(0)) != 0)
-                            {
-                                Transaction change = new Transaction(newTran.getDestination(), newTran.getSource(), reminder.abs());
-                                change.setOriginTransaction(newTran.getDigitalSignature());
-                            }
-                            
-                            //We are done!
-                            validTransaction = true;
-                            break;
-                        }
-                    }
-                }
-                
-                //The transaction is golden. Added to the current block.
-                if(validTransaction)
-                {
-                    //Update the unspent trans cache for the recipient of this transaction
-                    unspentCache.get(newTran.getDestination()).add(newTran);
-                    CurrentBlock.addTransaction(newTran); //Add the Transaction itself
-                    CurrentBlock.addTransactions(funds); //Add the inputs and outputs
-                }
-            }
-        }
-
-        if(CurrentBlock.getTransactions().size() > 0)
-            CurrentBlock = null;
-            
-        return CurrentBlock;
-    }
 
     /**
      * Gets a branch from the block chain, beginning with the block with passed hash and lenght, and ending in the 
@@ -613,5 +536,9 @@ public static void main(String[] args)
     public LinkedHashMap<byte[], Integer> getChainBranch(byte[] hash, int lenght) {
         return bchain.getChainBranch(hash,lenght);
     }
+
+    public void incomingTransaction(Transaction t) {
+        pool.addTransaction(t);
+}
 }
 

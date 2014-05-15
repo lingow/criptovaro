@@ -1,5 +1,6 @@
 package criptovaro;
 
+import java.util.Collection;
 import java.util.ArrayList;
 import java.util.Queue;
 import java.util.Set;
@@ -10,7 +11,7 @@ public class TransactionPool {
     public synchronized void addTransaction(Transaction tran) {
     }
 
-    public synchronized void addTransactionList(Transaction[] transactions) {
+    public synchronized void addTransactionList(Collection<Transaction> transactions) {
     }
 
     public synchronized Transaction consumeTransaction() {
@@ -23,7 +24,11 @@ public class TransactionPool {
     public synchronized int getPoolLength() {
         return 0;
     }
+
+    public void removeIfExist(Collection<Transaction> transaction) 
+    {
     
+    }
     public ArrayList<Transaction> cosumeAllTransaction()
     {
         return null;    

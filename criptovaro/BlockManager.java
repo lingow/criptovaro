@@ -24,7 +24,7 @@ public class BlockManager
         sb = new StringBuilder();
     }
 
-    public void insertBlock(Block b) 
+    public boolean insertBlock(Block b) 
     {
         try
         {
@@ -40,7 +40,7 @@ public class BlockManager
             //Prepare the query
             String insertBlock = "INSERT INTO BLOCKS (PREVIOUS_BLOCK_HASH, HASH, LENGTH, SOLVERPUBLICKEY, PROOF) VALUES (?, ?, ?, ?, ?)";
             pstmt = conn.prepareStatement(insertBlock);
-            pstmt.setString(1, encoder.encode(b.getPreviousBlock()));
+            pstmt.setString(1, encoder.encode(b.getPreviousBlockHash()));
             pstmt.setString(2, encoder.encode(b.getHash()));
             pstmt.setLong(3, b.getBlockChainPosition());
             pstmt.setString(4, encoder.encode(b.getSolverPublicKey()));
@@ -64,13 +64,13 @@ public class BlockManager
             {
                 pstmt.setString(1, encoder.encode(b.getHash()));
                 pstmt.setString(2, "0");
-                pstmt.setString(3, encoder.encode(t.getOriginTransaction())); //TODO: Look in the code for change transactions and set this field
+                pstmt.setString(3, encoder.encode(t.getOriginTransaction()));
                 pstmt.setString(4, encoder.encode(t.getSource()));
                 pstmt.setString(5, encoder.encode(t.getDestination()));
                 pstmt.setDouble(6, t.getAmount().doubleValue()); //ALERT: Possible bug that loses precision in decimals by converting to double
                 pstmt.setString(7, encoder.encode(t.getDigitalSignature()));
                 pstmt.setString(8, String.valueOf(t.getTimestamp()));
-                pstmt.setString(9, encoder.encode(t.getSpentBy())); //TODO: Look in the code for change transactions and set this field
+                pstmt.setString(9, encoder.encode(t.getSpentBy())); 
                 pstmt.addBatch();
             }
             
@@ -103,6 +103,7 @@ public class BlockManager
         {
             Ledger.INSTANCE.disconnect(conn);
         }
+        return true;
     }
 
     public void deleteBlock(Block b) 
@@ -110,8 +111,9 @@ public class BlockManager
         
     }
 
-    public Block getBlock(byte[] blockHash) 
+    public Block getBlock(BlockNode bn) 
     {
+        //TODO: Implement Method
         return null;
     }
 }

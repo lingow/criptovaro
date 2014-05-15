@@ -14,6 +14,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.logging.Level;
 
 public class Block implements Serializable {
@@ -31,25 +32,74 @@ public class Block implements Serializable {
         return transactions;
     }
 
-    public boolean addTransaction(Transaction tran)
+    public boolean addTransaction(Transaction newTran, TransactionManager tm, HashMap<byte[], ArrayList<Transaction>> unspentCache)
     {   
-        //Validate transaction signature
-        if(!tran.verify())
+        if( newTran != null && newTran.getType() == TransactionType.REGULAR && newTran.getAmount().compareTo(BigDecimal.valueOf(0)) <= 0 &&
+            !Arrays.equals(newTran.getSource(), newTran.getDestination()))
         {
-            Miner.LOG.log(Level.INFO, "Transaction verification failed. Not adding to block.");    
-            return false;
+            boolean validTransaction = false;
+            ArrayList<Transaction> funds = new ArrayList<Transaction>();
+                
+            //Check that the transaction's signature and semantics are correct.
+            if(newTran.verify())
+            {
+                //First we check Ledger for unspent transactions to solvent this transaction
+                ArrayList<Transaction> sourceFunds = unspentCache.get(newTran.getSource());
+                ArrayList<Transaction> destinationFunds = unspentCache.get(newTran.getDestination());
+                
+                if(sourceFunds == null)
+                {
+                    sourceFunds = tm.getAccountFunds(newTran.getSource());
+                    unspentCache.put(newTran.getSource(), sourceFunds);
+        }
+
+                if(destinationFunds == null)
+                {
+                    sourceFunds = tm.getAccountFunds(newTran.getSource());
+                    unspentCache.put(newTran.getDestination(), destinationFunds);
+                }
+                    
+                BigDecimal reminder = newTran.getAmount();
+                for(Transaction t : sourceFunds)
+                {
+                    reminder.subtract(t.getAmount());
+                    funds.add(t);
+                    if(reminder.compareTo(BigDecimal.valueOf(0)) < 1)
+                    {
+                        //We have enough funds. Now need to check if exact amount or change is needed.
+                        if(reminder.compareTo(BigDecimal.valueOf(0)) != 0)
+                        {
+                            Transaction change = new Transaction(newTran.getDestination(), newTran.getSource(), reminder.abs());
+                            change.setOriginTransaction(newTran.getDigitalSignature());
+                            this.transactions.add(change);
+                        }
+                        
+                        //Mark all the transactions that will fund this transactions as spent and remove them from the unspent cache
+                        for(Transaction f : funds)
+                        {
+                            f.setSpentBy(newTran.getSource());
+                            sourceFunds.remove(f);
+                        }
+                        
+                        //We are done!
+                        validTransaction = true;
+                        break;
+                    }
+                }
+            }
+            
+            //The transaction is golden. Added to the current block.
+            if(validTransaction)
+            {
+                //Update the unspent trans cache for the recipient of this transaction
+                unspentCache.get(newTran.getDestination()).add(newTran);
+                this.transactions.add(newTran); //Add the Transaction itself
+                this.transactions.addAll(funds); //Add the inputs and outputs
+                return true;
+            }
         }
         
-        //Validate transaction semantics
-        if(Arrays.equals(tran.getSource(), tran.getDestination()) || tran.getAmount().compareTo(BigDecimal.valueOf(0)) <= 0)
-        {
-            Miner.LOG.log(Level.INFO, "Transaction semantics are incorrect failed. Not adding to block.");    
-            return false;
-        }
-        
-        transactions.add(tran);
-        
-        return true;
+        return false;
     }
 
 
@@ -82,17 +132,17 @@ public class Block implements Serializable {
         return result;
     }
 
-    public void addTransactions(ArrayList<Transaction> trans) 
+    public void addTransactions(ArrayList<Transaction> trans, TransactionManager tm, HashMap<byte[], ArrayList<Transaction>> unspentCache) 
     {
         for(Transaction t : trans)
         {
-            transactions.add(t);    
+            this.addTransaction(t, tm, unspentCache);    
         }
     }
 
-    public Block(ArrayList<Transaction> trans) 
+    public Block(ArrayList<Transaction> trans, TransactionManager tm, HashMap<byte[], ArrayList<Transaction>> unspentCache) 
     {
-        addTransactions(trans);
+        addTransactions(trans, tm, unspentCache);
     }
     
     public Block()
@@ -126,12 +176,12 @@ public class Block implements Serializable {
                 return true;
             }
         }
-              
+        
         
         return false;
     }
 
-    public byte[] getPreviousBlock() 
+    public byte[] getPreviousBlockHash() 
     {
         return previousBlock;
     }
@@ -167,6 +217,12 @@ public class Block implements Serializable {
         this.blockChainPosition = blockChainPosition;
     }
 
+    public Collection<Transaction> getRegularTrans() 
+    {
+        //TODO: Implement Method
+        return new ArrayList<Transaction>();
+    }
+    
     void setPrizeTransaction(Transaction prize) 
     {
         this.prize = prize;
