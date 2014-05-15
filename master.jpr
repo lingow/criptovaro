@@ -71,6 +71,14 @@
    </hash>
    <hash n="oracle.jdeveloper.runner.RunConfigurations">
       <hash n="runConfigurationDefinitions">
+         <hash n="Client">
+            <value n="allowInput" v="true"/>
+            <value n="custom" v="false"/>
+            <value n="name" v="Client"/>
+            <value n="programArguments" v=""/>
+            <url n="runDirectoryURL" path="../"/>
+            <url n="targetURL" path="classes/criptovaro/Client.class"/>
+         </hash>
          <hash n="Default">
             <value n="custom" v="false"/>
             <value n="name" v="Default"/>
@@ -85,6 +93,7 @@
          </hash>
       </hash>
       <list n="runConfigurationList">
+         <string v="Client"/>
          <string v="Default"/>
          <string v="MinerTest"/>
       </list>

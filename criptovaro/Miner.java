@@ -406,15 +406,15 @@ public static void main(String[] args)
         //Expected result: Successful transaction with an output of the reminder 30 CV to account 1
         //Test inputs: 2 ficticious transaction from PAST account to ORIGIN account.
         Account acc1 = new Account();
-        acc1.setNickname("ORIGIN_ACCOUNT");
+        acc1.setAlias("ORIGIN_ACCOUNT");
         acc1.generateKeys();
         
         Account acc2 = new Account();
-        acc2.setNickname("DESTINATION_ACCOUNT");
+        acc2.setAlias("DESTINATION_ACCOUNT");
         acc2.generateKeys();
         
         Account acc3 = new Account();
-        acc3.setNickname("PAST_ACCOUNT");
+        acc3.setAlias("PAST_ACCOUNT");
         acc3.generateKeys();
         
         Transaction t1 = new Transaction(acc1.getPublicKey(), acc2.getPublicKey(), BigDecimal.valueOf(100));
