@@ -30,10 +30,10 @@ public class Ledger {
     private static final String[] createTableQueries = 
         {"CREATE TABLE IF NOT EXISTS BLOCKS \n" + 
         "( BLOCK_ID INTEGER NOT NULL \n" + 
-        ", PREVIOUS_BLOCK_HASH VARCHAR(32) NOT NULL \n" + 
-        ", HASH VARCHAR(32) NOT NULL \n" + 
+        ", PREVIOUS_BLOCK_HASH VARCHAR(1024) NOT NULL \n" + 
+        ", HASH VARCHAR(1024) NOT NULL \n" + 
         ", LENGTH NUMBER NOT NULL \n" + 
-        ", SOLVERPUBLICKEY VARCHAR(128) NOT NULL \n" + 
+        ", SOLVERPUBLICKEY VARCHAR(1024) NOT NULL \n" + 
         ", PROOF NUMBER NOT NULL \n" + 
         "    REFERENCES BLOCKS ( BLOCK_ID )\n" + 
         "     \n" + 
@@ -44,15 +44,15 @@ public class Ledger {
         "CREATE INDEX IF NOT EXISTS BLOCKS_INDEX2 ON BLOCKS ( HASH,  LENGTH DESC);\n" , 
         "CREATE TABLE IF NOT EXISTS TRANSACTIONS \n" + 
         "( TRANSACTION_ID INTEGER NOT NULL \n" + 
-        ", OWNING_BLOCK_ID VARCHAR(128) NOT NULL \n" + 
+        ", OWNING_BLOCK_ID VARCHAR(1024) NOT NULL \n" + 
         ", TRANSTYPE NUMBER NOT NULL \n" + 
-        ", ORIGINTRANS VARCHAR(128) \n" + 
-        ", FROMKEY VARCHAR(128) NOT NULL \n" + 
-        ", TOKEY VARCHAR(128) NOT NULL \n" + 
+        ", ORIGINTRANS VARCHAR(1024) \n" + 
+        ", FROMKEY VARCHAR(1024) NOT NULL \n" + 
+        ", TOKEY VARCHAR(1024) NOT NULL \n" + 
         ", AMOUNT NUMBER NOT NULL \n" + 
-        ", SIGNATURE VARCHAR(128) NOT NULL \n" + 
+        ", SIGNATURE VARCHAR(1024) NOT NULL \n" + 
         ", TIMESTAMP TIMESTAMP NOT NULL \n" + 
-        ", spentby VARCHAR(128) \n" + 
+        ", spentby VARCHAR(1024) \n" + 
         ", CONSTRAINT TRANSACTIONS_OWNING_BLOCK FOREIGN KEY ( OWNING_BLOCK_ID )\n" + 
         "    REFERENCES BLOCKS ( BLOCK_ID )\n" + 
         "    ON DELETE CASCADE \n" + 

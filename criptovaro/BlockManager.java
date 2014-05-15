@@ -54,7 +54,6 @@ public class BlockManager
             }
             
             //Now we insert all the corresponding transactions.
-            String selectblockID = "(SELECT BLOCK_ID FROM BLOCKS WHERE HASH='" + encoder.encode(b.getHash()) + "' AND LENGTH =" + b.getBlockChainPosition() + ")";
             String insertTrans = "INSERT OR REPLACE INTO TRANSACTIONS (OWNING_BLOCK_ID, TRANSTYPE, ORIGINTRANS, FROMKEY, TOKEY, AMOUNT, SIGNATURE," +
                                  "TIMESTAMP, SPENTBY) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
             pstmt = conn.prepareStatement(insertTrans);
@@ -108,7 +107,68 @@ public class BlockManager
 
     public void deleteBlock(Block b) 
     {
+        //Get the needed objects
+        BASE64Encoder encoder = new BASE64Encoder();
+        conn = Ledger.INSTANCE.connect();
+        int affectedRows = 0;
+        long blockID = -1;
+        boolean commit = true;
         
+        //Turn off auto-commit to treat this whole block as a transaction
+        try 
+        {
+            conn = Ledger.INSTANCE.connect();
+            conn.setAutoCommit(false);
+            
+            String selectblockID = "SELECT BLOCK_ID FROM BLOCKS WHERE HASH=? AND LENGTH=?";
+            String deleteTrans = "DELETE FROM TRANSACTIONS WHERE OWNING_BLOCK_ID=?";
+            String deleteBlock = "DELETE FROM BLOCKS WHERE BLOCK_ID=?";
+            
+            //Get the block id
+            pstmt = conn.prepareStatement(selectblockID);
+            pstmt.setString(1, encoder.encode(b.getHash()));
+            pstmt.setLong(2, b.getBlockChainPosition());
+            rs = pstmt.executeQuery();
+            
+            while(rs.next())
+            {
+                blockID = rs.getLong(1);
+            }
+            
+            if(blockID < 0)
+            {
+                Miner.LOG.log(Level.INFO, "Block not found. Exiting deleteBlock");
+                return;
+            }
+            rs.close(); //Close the result set to reuse the statement
+            
+            //Now delete all transactions
+            pstmt = conn.prepareStatement(deleteTrans);
+            pstmt.setLong(1, blockID);
+            affectedRows = pstmt.executeUpdate();
+            if(affectedRows < 1)
+                commit = false;
+            
+            //Now delete the block
+            pstmt = conn.prepareStatement(deleteBlock);
+            pstmt.setLong(1, blockID);
+            affectedRows = pstmt.executeUpdate();
+                if(affectedRows < 1)
+                    commit = false;
+            
+            if(commit)
+                conn.commit();
+            Miner.LOG.log(Level.INFO, "Block deleted successfully.");
+        } 
+        catch (SQLException e) 
+        {
+            Miner.LOG.log(Level.INFO, e.toString());
+            e.printStackTrace();
+        }
+        finally
+        {
+            Ledger.INSTANCE.disconnect(conn);
+        }
     }
 
     public Block getBlock(BlockNode bn) 

@@ -12,7 +12,7 @@ public class Peer {
     private InetAddress iPAddress;
     private int port;
     private byte[] hash;
-    private int lenght;
+    private long length;
 
     public void setPort(int port) {
         this.port=port;
@@ -61,7 +61,7 @@ public class Peer {
         return this.getKey().equals(p.getKey());
     }
 
-    public int getLenght() {
+    public long getLength() {
         //TODO: Implement this method
         return 0;
     }
@@ -74,7 +74,7 @@ public class Peer {
         //TODO: Implement this method
     }
     
-    void setLenght(int lenght) {
+    void setLength(long lenght) {
         //TODO: Implement this method
     }
 }
