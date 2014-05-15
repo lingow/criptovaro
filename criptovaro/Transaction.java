@@ -228,4 +228,8 @@ public class Transaction implements Serializable {
         //TODO: Implement this Method
         return null;
     }
+    
+    public boolean equals(Transaction t ){
+        return Arrays.equals(this.digitalSignature, t.getDigitalSignature());
+    }
 }
