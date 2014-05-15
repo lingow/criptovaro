@@ -114,7 +114,7 @@ public class Miner {
                 //No peer is best peer. Start working
                 break;
     }
-            if (bchain.getLenght() < bestPeer.getLenght()){
+            if (bchain.getLenght() < bestPeer.getLength()){
                 // He Wins
                 LinkedHashMap<byte[],Integer> peerBranchHash = (new BranchRequest(bchain.getHash(),bchain.getLenght())).request(bestPeer);
 
@@ -189,7 +189,7 @@ public class Miner {
                     PeerManager.INSTANCE.deletePeer(bestPeer);
                     continue;
                 } 
-            } else if (bchain.getLenght() > bestPeer.getLenght()){
+            } else if (bchain.getLenght() > bestPeer.getLength()){
                 // I Win
                 new StatMessage(bchain.getHash(),bchain.getLenght()).bcast();
                 break;
@@ -197,8 +197,12 @@ public class Miner {
         }
     }
 
-    public synchronized void toggleWork() {
-        //TODO: implement this method
+    public synchronized void toggleWork() 
+    {
+        if(this.interruptWork)
+            this.interruptWork = false;
+        else
+            this.interruptWork = true;
     }
     
     private Transaction createPrizeTransaction() {
@@ -248,9 +252,6 @@ public class Miner {
                 {
                     CurrentBlock.addTransactions(incomingTransactions, this.tm, unspentTransCache);
                     
-                    //Now remove them from the transaction pool
-                    this.pool.removeIfExist(CurrentBlock.getRegularTrans());
-                    
                     //If new transaction was added, reset the proof iterator to a new random.
                     currentProof = sr.nextLong();
                 }
@@ -290,7 +291,11 @@ public class Miner {
                     //Commit Block
                     bchain.appendBlock(CurrentBlock);
                     
-                    //TODO: Broadast the result.
+                    //Now remove them from the transaction pool
+                    this.pool.removeIfExist(CurrentBlock.getRegularTrans());
+                    
+                    //Broadcast solution
+                    (new StatMessage(CurrentBlock.getHash(), CurrentBlock.getBlockChainPosition())).bcast();
                     
                     CurrentBlock = null;
                     incomingTransactions = null;
@@ -498,7 +503,7 @@ public static void main(String[] args)
 
     private long getProofTest()
     {
-        return 0;    
+        return Long.MAX_VALUE -  (bchain.getLenght() * 100);    
     }
 
     /**
@@ -507,12 +512,12 @@ public static void main(String[] args)
      */
     public void receivedStat(Peer peer) 
     {
-        if (bchain.getLenght() < peer.getLenght())
+        if (bchain.getLenght() < peer.getLength())
         {
             // He Wins
             toggleWork();
         } 
-        else if (bchain.getLenght() > peer.getLenght())
+        else if (bchain.getLenght() > peer.getLength())
         {
             // I Win
             new StatMessage(bchain.getHash(),bchain.getLenght()).send(peer);
