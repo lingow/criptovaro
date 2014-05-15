@@ -2,53 +2,70 @@ package criptovaro;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Deque;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Stack;
 
 public class BlockChain {
     private BlockManager bm;
-    private Block header;
-    private int length;
+    private LinkedList<BlockNode> blockChain;
 
-    public Transaction[] rollbackBlock() {
-        return null;
+    /**
+     * Rollbacks the latest block from the block chain and from disk
+     * @return the leftover regular transactions that these blocks processed before
+     */
+    public Collection<Transaction> rollbackBlock() {
+        Collection<Transaction> leftovers = new ArrayList<Transaction>();
+        BlockNode chainTop = blockChain.pop();
+        Block blockToKill = bm.getBlock(chainTop);
+        
+        for(Transaction t : blockToKill.getRegularTrans()){
+                leftovers.add(t);
+        }
+        bm.deleteBlock(blockToKill);
+        return leftovers;
     }
 
+    /**
+     * Appends the block to the last position in the chain
+     * @param b the block to append. It should be fully verified and complete. It will not be modified.
+     * @return true if the block was correctly inserted
+     */
     public boolean appendBlock(Block b) {
-        return true;
-    }
-
-    public Block getPrevBlock(Block b) {
-        return null;
-    }
-
-    public boolean containsBlock(byte[] blockHash) {
-        return true;
+        boolean inserted = bm.insertBlock(b);
+        if (inserted){
+            blockChain.push(new BlockNode(blockChain.peek().lenght+1,b.getHash()));
+        }
+        return inserted;
     }
     
     public BlockChain()
     {
-        //Set block header here    
+        this.bm = new BlockManager();
+        this.blockChain = new LinkedList<BlockNode>();
     }
     
-    public Block getBlockHeader()
+    public Block getLatestBlock()
     {
-        return null;    
+        return bm.getBlock(blockChain.peek());
     }
 
     /**
      * @return current chain's total lenght
      */
     public int getLenght() {
-        //TODO: Implement this method
-        return 0;
+        return blockChain.peek().lenght;
     }
 
     /**
      * @return the last block's hash in this block chain
      */
     public byte[] getHash() {
-        //TODO: Implement this method
-        return null;
+        return blockChain.peek().hash;
     }
 
     /**
@@ -59,16 +76,34 @@ public class BlockChain {
      * and lenght are not found
      */
     LinkedHashMap<byte[], Integer> getChainBranch(byte[] hash, int lenght) {
-        //TODO: Implement this method
-        return new LinkedHashMap<byte[],Integer>();
+        LinkedHashMap<byte[], Integer> retMap= new LinkedHashMap<byte[], Integer>();
+        boolean found=false;
+        for (BlockNode bn : blockChain){
+            if (found){
+                retMap.put(bn.hash, bn.lenght);
+            }
+            if (bn.hash==hash && bn.lenght==lenght){
+                found=true;
+                retMap.put(bn.hash, bn.lenght);
+            }
+        }
+        if (found){
+           return retMap; 
+        }
+        for (BlockNode bn : blockChain){
+            retMap.put(bn.hash, bn.lenght);
+        }
+        return retMap;
     }
 
     /**
      * @return this block chain's BlockNode list in backwards order
      */
-    Collection<BlockNode> getBackwardsBlockChain() {
-        //TODO: Implement this method
-        return new ArrayList<BlockNode>();
+    public Collection<BlockNode> getBackwardsBlockChain() {
+        LinkedList<BlockNode> retList = new LinkedList<BlockNode>();
+        Collections.copy(blockChain, retList);
+        Collections.reverse(retList);
+        return retList;
     }
 
     /**
@@ -77,19 +112,23 @@ public class BlockChain {
      * regular transactions (non change, non prize) into the Transaction Pool, and retrieving those transactions as new
      * peerBlocks are integrated into the blockchain.
      * The branch is not merged if the resulting lenght would be smaller than the current lenght
-     * @param commonlenght the lenght from which to begin the merge
+     * @param commonNode the BlockNode from which to begin the merge
      * @param peerBlocks the blocks offered by a peer to insert into the blockchain
      * @param tp the transaction pool
      */
-    void merge(int commonlenght, LinkedHashMap<BlockNode, Block> peerBlocks,TransactionPool tp) {
-        //TODO: Implement this method
-    }
-
-    /** 
-     * Writes this blockChain into the Ledger. We begin from the latest block and go back until we hit a block which is
-     * already in the database. As we do this, we get rid of the in memory block structure.
-     */
-    void commitChain() {
-        //TODO: Implement this method
+    void merge(BlockNode commonNode, LinkedHashMap<BlockNode, Block> peerBlocks,TransactionPool tp) {
+        if ( commonNode.lenght + peerBlocks.size() > getLenght()){
+            while(true){
+                if (! blockChain.peek().equals(commonNode)){
+                    tp.addTransactionList(rollbackBlock());
+                } else {
+                    break;
+                }
+            }
+            for(Block b : peerBlocks.values()){
+                tp.removeIfExist(b.getRegularTrans());
+                appendBlock(b);
+            }
+        }
     }
 }

@@ -118,20 +118,26 @@ public class Miner {
                 LinkedHashMap<byte[],Integer> peerBranchHash = (new BranchRequest(bchain.getHash(),bchain.getLenght())).request(bestPeer);
 
                 //First look for where we are in the incoming branch
-                int commonlenght=0;
+                BlockNode commonNode = null;
                 for(BlockNode bn : bchain.getBackwardsBlockChain()){
                     Integer i = peerBranchHash.get(bn.hash);
                     if ( i != null){
-                        if (bn.lenght == i){
-                            commonlenght = i.intValue();
+                        BlockNode peerNode = new BlockNode(i,bn.hash);
+                        if (bn.equals(peerNode)){
+                            commonNode = bn;
                         }
                         break;
                     }
                 }
+                if (commonNode == null){
+                    //We are in completely different branches
+                    PeerManager.INSTANCE.deletePeer(bestPeer);
+                    continue;
+                }
                 //Now form the BlockNode list 
                 List<BlockNode> peerBranch = new ArrayList<>();
                 for(Map.Entry<byte[],Integer> entry:peerBranchHash.entrySet()){
-                    if ( entry.getValue().intValue() > commonlenght){
+                    if ( entry.getValue().intValue() > commonNode.lenght){
                         peerBranch.add(new BlockNode(entry.getValue().intValue(),entry.getKey()));
                     }
                 }
@@ -176,8 +182,7 @@ public class Miner {
                     continue;
                 }
                 if (!peerBlocks.isEmpty()){
-                    bchain.merge(commonlenght,peerBlocks,pool);
-                    bchain.commitChain();
+                    bchain.merge(commonNode,peerBlocks,pool);
                     break;
                 } else {
                     //How did we even got here? It must be the peers fault! Burn the Witch!
@@ -224,8 +229,8 @@ public class Miner {
                 if(CurrentBlock == null)
                 {
                     CurrentBlock = new Block();
-                    if(bchain.getBlockHeader() != null)
-                        CurrentBlock.setPreviousBlock(bchain.getBlockHeader().getHash());
+                    if(bchain.getLatestBlock() != null)
+                        CurrentBlock.setPreviousBlock(bchain.getLatestBlock().getHash());
                     else
                     CurrentBlock.setPreviousBlock(null);
                 }

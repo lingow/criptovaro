@@ -24,7 +24,7 @@ public class BlockManager
         sb = new StringBuilder();
     }
 
-    public void insertBlock(Block b) 
+    public boolean insertBlock(Block b) 
     {
         try
         {
@@ -40,7 +40,7 @@ public class BlockManager
             //Prepare the query
             String insertBlock = "INSERT INTO BLOCKS (PREVIOUS_BLOCK_HASH, HASH, LENGTH, SOLVERPUBLICKEY, PROOF) VALUES (?, ?, ?, ?, ?)";
             pstmt = conn.prepareStatement(insertBlock);
-            pstmt.setString(1, encoder.encode(b.getPreviousBlock()));
+            pstmt.setString(1, encoder.encode(b.getPreviousBlockHash()));
             pstmt.setString(2, encoder.encode(b.getHash()));
             pstmt.setLong(3, b.getBlockChainPosition());
             pstmt.setString(4, encoder.encode(b.getSolverPublicKey()));
@@ -103,6 +103,7 @@ public class BlockManager
         {
             Ledger.INSTANCE.disconnect(conn);
         }
+        return true;
     }
 
     public void deleteBlock(Block b) 
@@ -110,8 +111,9 @@ public class BlockManager
         
     }
 
-    public Block getBlock(byte[] blockHash) 
+    public Block getBlock(BlockNode bn) 
     {
+        //TODO: Implement Method
         return null;
     }
 }
