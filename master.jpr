@@ -46,8 +46,13 @@
    <value n="defaultPackage" v="master"/>
    <hash n="oracle.ide.model.TechnologyScopeConfiguration">
       <list n="technologyScope">
+         <string v="Database"/>
+         <string v="Database-Modeling"/>
+         <string v="HTML"/>
+         <string v="JAVASCRIPT"/>
          <string v="Java"/>
          <string v="Java-Modeling"/>
+         <string v="XML"/>
       </list>
    </hash>
    <hash n="oracle.jdeveloper.compiler.OjcConfiguration">
@@ -63,6 +68,62 @@
             <url path="."/>
          </list>
       </hash>
+   </hash>
+   <hash n="oracle.jdeveloper.runner.RunConfigurations">
+      <hash n="runConfigurationDefinitions">
+         <hash n="Client">
+            <value n="allowInput" v="true"/>
+            <value n="custom" v="false"/>
+            <value n="name" v="Client"/>
+            <value n="programArguments" v=""/>
+            <url n="runDirectoryURL" path="../"/>
+            <url n="targetURL" path="classes/criptovaro/Client.class"/>
+         </hash>
+         <hash n="Default">
+            <value n="custom" v="false"/>
+            <value n="name" v="Default"/>
+            <url n="targetURL" path="master.jws"/>
+         </hash>
+         <hash n="MinerTest">
+            <value n="custom" v="false"/>
+            <value n="name" v="MinerTest"/>
+            <value n="programArguments" v="-public_key a -private_key b -tcp_port 12345 -web_port 8080"/>
+            <url n="runDirectoryURL" path="../"/>
+            <url n="targetURL" path="criptovaro/Miner.java"/>
+         </hash>
+      </hash>
+      <list n="runConfigurationList">
+         <string v="Client"/>
+         <string v="Default"/>
+         <string v="MinerTest"/>
+      </list>
+   </hash>
+   <hash n="oracle.jdevimpl.config.JProjectLibraries">
+      <list n="exportedReferences">
+         <hash>
+            <value n="id" v="Sqlite-jdbc-3.7.2.jar"/>
+            <value n="isJDK" v="false"/>
+         </hash>
+      </list>
+      <hash n="internalDefinitions">
+         <list n="libraryDefinitions">
+            <hash>
+               <list n="classPath">
+                  <url path="sqlite-jdbc-3.7.2.jar" jar-entry=""/>
+               </list>
+               <value n="deployedByDefault" v="true"/>
+               <value n="description" v="Sqlite-jdbc-3.7.2.jar"/>
+               <value n="id" v="Sqlite-jdbc-3.7.2.jar"/>
+               <value n="locked" v="true"/>
+            </hash>
+         </list>
+      </hash>
+      <list n="libraryReferences">
+         <hash>
+            <value n="id" v="Sqlite-jdbc-3.7.2.jar"/>
+            <value n="isJDK" v="false"/>
+         </hash>
+      </list>
    </hash>
    <hash n="oracle.jdevimpl.config.JProjectPaths">
       <url n="outputDirectory" path="classes/"/>
