@@ -150,7 +150,8 @@ public class Miner {
                         failed=true;
                         break;
                     }
-                    Block b = prepareBlock(peerBlock.getTransactions());
+                    Block b = prepareBlock(peerBlock.getTransactions(), peerBlock.getBlockChainPosition(), peerBlock.getPreviousBlock(),
+                                           new HashMap<byte[], ArrayList<Transaction>>());
                     if (b == null){
                         //Block is incorrectly formed
                         failed=true;
@@ -205,9 +206,8 @@ public class Miner {
         try
         {
             LOG.log(Level.INFO, "Entering work loop.");
-            Transaction newTran = null;
+            ArrayList<Transaction> incomingTransactions = null;
             Block CurrentBlock = null;
-            boolean newTransAdded = false;
             long currentProof = 0;
             Random sr = new Random();
             ByteArrayOutputStream theBytes = new ByteArrayOutputStream();
@@ -216,7 +216,8 @@ public class Miner {
             byte[] blockHash = null;
             byte[] saltHash = null;
             byte[] proofHash = null;
-            
+            HashMap<byte[], ArrayList<Transaction>> unspentTransCache = null;
+                
             //Not synchronized access to this variable, however it's fine since at most we'll spend one more cycle working. 
             while(!this.interruptWork)
             {
@@ -224,57 +225,39 @@ public class Miner {
                 if(CurrentBlock == null)
                 {
                     CurrentBlock = new Block();
+                    unspentTransCache = new HashMap<byte[], ArrayList<Transaction>>();
+                    Transaction prize = new Transaction(this.currentAccount.getPublicKey(), this.currentAccount.getPublicKey(),BigDecimal.valueOf(100));
+                    CurrentBlock.setPrizeTransaction(prize);
                     if(bchain.getBlockHeader() != null)
-                        CurrentBlock.setPreviousBlock(bchain.getBlockHeader().getHash());
-                    else
-                    CurrentBlock.setPreviousBlock(null);
-                }
-                //Check if new transactions in the work pool.
-                newTran = null;
-                do
-                {
-                    newTran = this.pool.consumeTransaction(); //This returns null when no new transactions are available.    
-                    //If new transaction, validate it, then prepare it, then add it to the block.
-                    if(newTran != null)
                     {
-                        boolean validTransaction = false;
-                        ArrayList<Transaction> funds = null;
-                        
-                        //Check that the transaction's signature and semantics are correct.
-                        if(tm.validateTransaction(newTran))
-                        {
-                            //First we check Ledger for unspent transactions to solvent this transaction
-                            funds = tm.getTransactionFunds(newTran);
-                                
-                            /*
-                             * If the ledger indicates there are not enough funds. Ideally we want to check the current 
-                             * block's transactions for funds as well, but the logic for multiple transactions getting 
-                             * funded from the current block can get messy. Add it as post-game.
-                             * TODO: Add logic such that a transaction can be funded from the current block's transactions.
-                             */
-                            if(funds != null)
-                                validTransaction = true;
-                        }
-                        
-                        //The transaction is golden. Added to the current block.
-                        if(validTransaction)
-                        {
-                            
-                            CurrentBlock.addTransaction(newTran);
-                            CurrentBlock.addFunds(funds);
-                            newTransAdded = true;
-                        }
+                        CurrentBlock.setPreviousBlock(bchain.getBlockHeader().getHash());
+                        CurrentBlock.setBlockChainPosition(bchain.getLenght() + 1);
                     }
+                    else
+                        CurrentBlock.setPreviousBlock(null);
                 }
-                while(newTran != null);
+                
+                //Check if new transactions in the work pool.
+                incomingTransactions = this.pool.cosumeAllTransaction();
+                
+                if(incomingTransactions != null)
+                {
+                    prepareBlock(incomingTransactions, CurrentBlock.getBlockChainPosition(), 
+                                                CurrentBlock.getPreviousBlock(), unspentTransCache);     
+                }
                 
                 //Done with new transactions, now try to calculate the proof for this block.
-        
                 //If new transaction was added, reset the proof iterator to a new random.
-                if(newTransAdded)
+                if(incomingTransactions != null)
                 {
                     currentProof = sr.nextLong();
-                    newTransAdded = false;
+                }
+                
+                if(CurrentBlock.getTransactions().size() < 2 )
+                {
+                    //No work to be done, only prize transaction in the block. Sleep for some time and continue to the next iteration
+                    Thread.sleep(100);
+                    continue;
                 }
                 
                 //Create SHA256 hash of proof and get bytes.
@@ -302,14 +285,15 @@ public class Miner {
                 {
                     //We have a winner!
                     //Commit Block
+                    bchain.appendBlock(CurrentBlock);
+                    
                     //TODO: Broadast the result.
-                    //Create and broadcast prize transaction
-                    //TODO: Create prize transaction and broadcast it. This could have been added as part of the block,
-                    //      however, not sure how that would be validated by other miners...
+                    
+                    CurrentBlock = null;
                 }
                 else
                 {
-                    //Failed proof :( Incremente the proof and try again.
+                    //Failed proof :( Increment the proof and try again.
                     currentProof++;
                 }
             }
@@ -325,6 +309,11 @@ public class Miner {
         {
             LOG.log(Level.INFO, e.toString());
             e.printStackTrace(); 
+        }
+        catch (InterruptedException e) 
+        {
+            LOG.log(Level.INFO, e.toString());
+            e.printStackTrace();
         }
     }
 
@@ -428,22 +417,22 @@ public static void main(String[] args)
         Transaction t2 = new Transaction(acc3.getPublicKey(), acc1.getPublicKey(), BigDecimal.valueOf(50));
         Transaction t3 = new Transaction(acc3.getPublicKey(), acc1.getPublicKey(), BigDecimal.valueOf(80));
         
-        t1.setOriginTransaction(new byte[]{0,1}); //BUG:validate
-        t1.setSpentBy(new byte[]{0,1}); //BUG: validate
+        //t1.setOriginTransaction(new byte[]{0,1}); //BUG:validate
+        //t1.setSpentBy(new byte[]{0,1}); //BUG: validate
         if(t1.Sign(acc1)) //Change this for an assert on unit test
             System.out.println("Transaction successfully signed!!");
         if(t1.verify()) 
             System.out.println("Transaction successfully verified!");
         
-        t2.setOriginTransaction(new byte[]{0,1}); //BUG:validate
-        t2.setSpentBy(new byte[]{0,1}); //BUG: validate
+        //t2.setOriginTransaction(new byte[]{0,1}); //BUG:validate
+        //t2.setSpentBy(new byte[]{0,1}); //BUG: validate
         if(t2.Sign(acc3)) //Change this for an assert on unit test
             System.out.println("Transaction successfully signed!!");
         if(t2.verify()) 
             System.out.println("Transaction successfully verified!");
         
-        t3.setOriginTransaction(new byte[]{0,1}); //BUG:validate
-        t3.setSpentBy(new byte[]{0,1}); //BUG: validate
+        //t3.setOriginTransaction(new byte[]{0,1}); //BUG:validate
+        //t3.setSpentBy(new byte[]{0,1}); //BUG: validate
         if(t3.Sign(acc3)) //Change this for an assert on unit test
             System.out.println("Transaction successfully signed!!");
         if(t3.verify()) 
@@ -493,8 +482,6 @@ public static void main(String[] args)
                 LOG.log(Level.INFO, "Failed to add transaction!");
             if(!b.addTransaction(t3))
                 LOG.log(Level.INFO, "Failed to add transaction!");
-            b.setPreviousBlock(new byte[]{0,1});
-            b.setSolverPublicKey(acc1.getPublicKey());
             bm.insertBlock(b);
             //End BlockManager test case
         }
@@ -546,9 +533,74 @@ public static void main(String[] args)
      * @param transactions A collection of  regular transactions from which the block should be formed
      * @return The formed block, of which only the proof is missing
      */
-    public Block prepareBlock(Collection<Transaction> transactions) {
-        //TODO: Implement method
-        return null;
+    public Block prepareBlock(Collection<Transaction> transactions, long length, byte[] prevBlock, 
+                              HashMap<byte[],ArrayList<Transaction>> unspentCache) 
+    {
+        Block CurrentBlock = new Block();
+        for(Transaction newTran : transactions)
+        {
+            //If new transaction, validate it, then prepare it, then add it to the block.
+            if(newTran != null)
+            {
+                boolean validTransaction = false;
+                ArrayList<Transaction> funds = new ArrayList<Transaction>();
+                    
+                //Check that the transaction's signature and semantics are correct.
+                if(newTran.verify())
+                {
+                    //First we check Ledger for unspent transactions to solvent this transaction
+                    ArrayList<Transaction> sourceFunds = unspentCache.get(newTran.getSource());
+                    ArrayList<Transaction> destinationFunds = unspentCache.get(newTran.getDestination());
+                    
+                    if(sourceFunds == null)
+                    {
+                        sourceFunds = tm.getAccountFunds(newTran.getSource());
+                        unspentCache.put(newTran.getSource(), sourceFunds);
+                    }
+                    
+                    if(destinationFunds == null)
+                    {
+                        sourceFunds = tm.getAccountFunds(newTran.getSource());
+                        unspentCache.put(newTran.getDestination(), destinationFunds);
+                    }
+                        
+                    BigDecimal reminder = newTran.getAmount();
+                    for(Transaction t : sourceFunds)
+                    {
+                        reminder.subtract(t.getAmount());
+                        t.setSpentBy(newTran.getSource());
+                        funds.add(t);
+                        if(reminder.compareTo(BigDecimal.valueOf(0)) < 1)
+                        {
+                            //We have enough funds. Now need to check if exact amount or change is needed.
+                            if(reminder.compareTo(BigDecimal.valueOf(0)) != 0)
+                            {
+                                Transaction change = new Transaction(newTran.getDestination(), newTran.getSource(), reminder.abs());
+                                change.setOriginTransaction(newTran.getDigitalSignature());
+                            }
+                            
+                            //We are done!
+                            validTransaction = true;
+                            break;
+                        }
+                    }
+                }
+                
+                //The transaction is golden. Added to the current block.
+                if(validTransaction)
+                {
+                    //Update the unspent trans cache for the recipient of this transaction
+                    unspentCache.get(newTran.getDestination()).add(newTran);
+                    CurrentBlock.addTransaction(newTran); //Add the Transaction itself
+                    CurrentBlock.addTransactions(funds); //Add the inputs and outputs
+                }
+            }
+        }
+
+        if(CurrentBlock.getTransactions().size() > 0)
+            CurrentBlock = null;
+            
+        return CurrentBlock;
     }
 
     /**

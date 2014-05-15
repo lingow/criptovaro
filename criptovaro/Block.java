@@ -13,18 +13,19 @@ import java.security.NoSuchAlgorithmException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.logging.Level;
 
 public class Block implements Serializable {
     @SuppressWarnings("compatibility:-894874531013678188")
     private static final long serialVersionUID = 1L;
     private ArrayList<Transaction> transactions;
-    private ArrayList<Transaction> funds;
     private long proof;
     private byte[] previousBlock;
     private byte[] SolverPublicKey;
     private long blockChainPosition;
-        
+    private Transaction prize;
+    
     public ArrayList<Transaction> getTransactions() 
     {
         return transactions;
@@ -81,7 +82,7 @@ public class Block implements Serializable {
         return result;
     }
 
-    public void addTransactions(Transaction[] trans) 
+    public void addTransactions(ArrayList<Transaction> trans) 
     {
         for(Transaction t : trans)
         {
@@ -89,7 +90,7 @@ public class Block implements Serializable {
         }
     }
 
-    public Block(Transaction[] trans) 
+    public Block(ArrayList<Transaction> trans) 
     {
         addTransactions(trans);
     }
@@ -97,6 +98,8 @@ public class Block implements Serializable {
     public Block()
     {
         transactions = new ArrayList<Transaction>();
+        previousBlock = new byte[]{};
+        SolverPublicKey = new byte[]{};
     }
 
     public boolean compare(Block otherBlock) 
@@ -123,29 +126,9 @@ public class Block implements Serializable {
                 return true;
             }
         }
-        
-        for(Transaction t : funds)
-        {
-            if(Arrays.equals(t.getDigitalSignature(), tran.getDigitalSignature()))
-            {
-                return true;
-            }
-        }        
+              
         
         return false;
-    }
-
-    public ArrayList<Transaction> getFunds() 
-    {
-        return funds;
-    }
-    
-    public void addFunds(ArrayList<Transaction> funds)
-    {
-        for(Transaction t : funds)
-        {
-            this.funds.add(t);    
-        }
     }
 
     public byte[] getPreviousBlock() 
@@ -182,5 +165,10 @@ public class Block implements Serializable {
 
     public void setBlockChainPosition(long blockChainPosition) {
         this.blockChainPosition = blockChainPosition;
+    }
+
+    void setPrizeTransaction(Transaction prize) 
+    {
+        this.prize = prize;
     }
 }

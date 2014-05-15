@@ -1,5 +1,6 @@
 package criptovaro;
 
+import java.util.ArrayList;
 import java.util.Queue;
 import java.util.Set;
 
@@ -21,5 +22,10 @@ public class TransactionPool {
 
     public synchronized int getPoolLength() {
         return 0;
+    }
+    
+    public ArrayList<Transaction> cosumeAllTransaction()
+    {
+        return null;    
     }
 }

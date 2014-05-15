@@ -13,7 +13,8 @@ public class BlockChain {
         return null;
     }
 
-    public boolean appendBlock(Block b) {
+    public boolean appendBlock(Block b) 
+    {
         return true;
     }
 
