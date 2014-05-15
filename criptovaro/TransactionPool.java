@@ -25,6 +25,5 @@ public class TransactionPool {
     }
 
     public void removeIfExist(Collection<Transaction> transaction) {
-        //TODO: Implement Method
     }
 }
