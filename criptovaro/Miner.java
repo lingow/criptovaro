@@ -566,5 +566,9 @@ public static void main(String[] args)
     public LinkedHashMap<byte[], Integer> getChainBranch(byte[] hash, int lenght) {
         return bchain.getChainBranch(hash,lenght);
     }
+
+    public void incomingTransaction(Transaction t) {
+        pool.addTransaction(t);
+    }
 }
 
