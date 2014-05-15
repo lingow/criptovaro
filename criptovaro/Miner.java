@@ -543,12 +543,19 @@ public static void main(String[] args)
      * @param lenght The lenght of the block where the chain will begin
      * @return a LinkedHashMap mapping block hashes to block lenght
      */
-    public LinkedHashMap<byte[], Integer> getChainBranch(byte[] hash, int lenght) {
+    public LinkedHashMap<byte[], Integer> getChainBranch(byte[] hash, int lenght) 
+    {
         return bchain.getChainBranch(hash,lenght);
     }
 
-    public void incomingTransaction(Transaction t) {
+    public void incomingTransaction(Transaction t) 
+    {
         pool.addTransaction(t);
-}
+    }
+    
+    public synchronized Collection<Transaction> getPoolTransactions()
+    {
+        return pool.getAllTransactions();
+    }
 }
 
