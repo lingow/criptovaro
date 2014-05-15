@@ -38,8 +38,6 @@ import java.util.List;
 public class Transaction implements Serializable {
     @SuppressWarnings("compatibility:-894874531013678188")
     private static final long serialVersionUID = 1L;
-    private List<Transaction> inputs;
-    private List<Transaction> outputs;
     private byte[] source; //public key for source account
     private byte[] destination; //public key for destination account
     private BigDecimal amount;
@@ -47,23 +45,16 @@ public class Transaction implements Serializable {
     private byte[] digitalSignature;
     private byte[] spentBy;
     private byte[] originTransaction;
-
+    private TransactionType type;
+    
     public Transaction(byte[] source, byte[] destination, BigDecimal amount)
     {
         this.source = source;
         this.destination = destination;
         this.amount = amount;
         
-        inputs = new ArrayList<Transaction>();
-        outputs = new ArrayList<Transaction>();
-    }
-    
-    public void addInput(Transaction input) 
-    {
-        inputs.add(input);
-    }
-
-    private void addOutput(Transaction output) {
+        spentBy = new byte[]{};
+        originTransaction = new byte[]{};
     }
 
     public boolean verify() 
@@ -234,12 +225,17 @@ public class Transaction implements Serializable {
         this.spentBy = spentBy;
     }
 
-    public TransactionType getType() {
-        //TODO: Implement this Method
-        return null;
+    public TransactionType getType() 
+    {
+        return type;
     }
     
     public boolean equals(Transaction t ){
         return Arrays.equals(this.digitalSignature, t.getDigitalSignature());
+    }
+
+    public void setType(TransactionType type) 
+    {
+        this.type = type;
     }
 }

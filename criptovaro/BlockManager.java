@@ -64,13 +64,13 @@ public class BlockManager
             {
                 pstmt.setString(1, encoder.encode(b.getHash()));
                 pstmt.setString(2, "0");
-                pstmt.setString(3, encoder.encode(t.getOriginTransaction())); //TODO: Look in the code for change transactions and set this field
+                pstmt.setString(3, encoder.encode(t.getOriginTransaction()));
                 pstmt.setString(4, encoder.encode(t.getSource()));
                 pstmt.setString(5, encoder.encode(t.getDestination()));
                 pstmt.setDouble(6, t.getAmount().doubleValue()); //ALERT: Possible bug that loses precision in decimals by converting to double
                 pstmt.setString(7, encoder.encode(t.getDigitalSignature()));
                 pstmt.setString(8, String.valueOf(t.getTimestamp()));
-                pstmt.setString(9, encoder.encode(t.getSpentBy())); //TODO: Look in the code for change transactions and set this field
+                pstmt.setString(9, encoder.encode(t.getSpentBy())); 
                 pstmt.addBatch();
             }
             

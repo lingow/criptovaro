@@ -25,7 +25,7 @@ public class BlockChain {
         
         for(Transaction t : blockToKill.getRegularTrans()){
                 leftovers.add(t);
-        }
+    }
         bm.deleteBlock(blockToKill);
         return leftovers;
     }
@@ -35,14 +35,17 @@ public class BlockChain {
      * @param b the block to append. It should be fully verified and complete. It will not be modified.
      * @return true if the block was correctly inserted
      */
-    public boolean appendBlock(Block b) {
+    public boolean appendBlock(Block b) 
+    {
         boolean inserted = bm.insertBlock(b);
-        if (inserted){
+        if (inserted)
+        {
             blockChain.push(new BlockNode(blockChain.peek().lenght+1,b.getHash()));
+
         }
         return inserted;
     }
-    
+
     public BlockChain()
     {
         this.bm = new BlockManager();
@@ -81,7 +84,7 @@ public class BlockChain {
         for (BlockNode bn : blockChain){
             if (found){
                 retMap.put(bn.hash, bn.lenght);
-            }
+    }
             if (bn.hash==hash && bn.lenght==lenght){
                 found=true;
                 retMap.put(bn.hash, bn.lenght);
@@ -123,12 +126,12 @@ public class BlockChain {
                     tp.addTransactionList(rollbackBlock());
                 } else {
                     break;
-                }
-            }
+    }
+    }
             for(Block b : peerBlocks.values()){
                 tp.removeIfExist(b.getRegularTrans());
                 appendBlock(b);
-            }
+}
         }
     }
 }

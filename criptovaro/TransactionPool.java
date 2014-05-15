@@ -1,12 +1,13 @@
 package criptovaro;
 
 import java.util.Collection;
+import java.util.ArrayList;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class TransactionPool extends ConcurrentLinkedDeque<Transaction> {
-    
+
     public TransactionPool(){
         super();
     }
@@ -26,7 +27,14 @@ public class TransactionPool extends ConcurrentLinkedDeque<Transaction> {
         return this.size();
     }
 
-    public void removeIfExist(Collection<Transaction> transaction) {
+    public void removeIfExist(Collection<Transaction> transaction) 
+    {
+    
         this.removeFirstOccurrence(transaction);
+    }
+    
+    public ArrayList<Transaction> getAllTransactions()
+    {
+        return null;    
     }
 }
