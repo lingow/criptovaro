@@ -78,7 +78,7 @@ public class Block implements Serializable {
                         //Mark all the transactions that will fund this transactions as spent and remove them from the unspent cache
                         for(Transaction f : funds)
                         {
-                            f.setSpentBy(newTran.getSource());
+                            f.setSpentBy(newTran.getDigitalSignature());
                             sourceFunds.remove(f);
                         }
                         
