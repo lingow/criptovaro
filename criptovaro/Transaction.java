@@ -23,16 +23,22 @@ import java.security.spec.PKCS8EncodedKeySpec;
 
 import java.security.spec.X509EncodedKeySpec;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Time;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import sun.misc.BASE64Decoder;
+
 /*
  * To use this class, one must do the following:
  * 1. First instanciate an object of the class with the source account, destination account and amount.
- * 2. Add the inputs necessary to cover the amount; 
- * 3. Call the Prepare() method to finalize the transaction. Prepare requires the source account to use it's private key. Prepare will sign 
+ * 2. Add the inputs necessary to cover the amount;
+ * 3. Call the Prepare() method to finalize the transaction. Prepare requires the source account to use it's private key. Prepare will sign
  *     the transaction and automatically generate the outputs based on the inputs and amount.
  */
 public class Transaction implements Serializable {
@@ -47,17 +53,32 @@ public class Transaction implements Serializable {
     private byte[] digitalSignature;
     private byte[] spentBy;
     private byte[] originTransaction;
+    TransactionType type;
 
     public Transaction(byte[] source, byte[] destination, BigDecimal amount)
     {
         this.source = source;
         this.destination = destination;
         this.amount = amount;
+        type = TransactionType.REGULAR;
         
         inputs = new ArrayList<Transaction>();
         outputs = new ArrayList<Transaction>();
     }
-    
+
+    Transaction(ResultSet rs) throws SQLException, IOException {
+        BASE64Decoder decoder = new BASE64Decoder();
+        
+        this.type= TransactionType.values()[(rs.getInt("TRANSTYPE"))];
+        this.originTransaction= decoder.decodeBuffer( rs.getString("ORIGINTRANS"));
+        this.source= decoder.decodeBuffer( rs.getString("FROMKEY"));
+        this.destination= decoder.decodeBuffer(rs.getString("TOKEY"));
+        this.amount= BigDecimal.valueOf(rs.getLong("AMOUNT"));
+        this.digitalSignature= decoder.decodeBuffer(rs.getString("SIGNATURE")); 
+        this.timestamp= rs.getDate("TIMESTAMP");
+        this.spentBy= decoder.decodeBuffer(rs.getString("spentby"));
+    }
+
     public void addInput(Transaction input) 
     {
         inputs.add(input);

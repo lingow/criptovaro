@@ -38,7 +38,7 @@ public class BlockChain {
     public boolean appendBlock(Block b) {
         boolean inserted = bm.insertBlock(b);
         if (inserted){
-            blockChain.push(new BlockNode(blockChain.peek().lenght+1,b.getHash()));
+            blockChain.push(new BlockNode((int)b.getBlockChainPosition(),b.getHash()));
         }
         return inserted;
     }

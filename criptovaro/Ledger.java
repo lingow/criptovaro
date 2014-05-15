@@ -222,4 +222,22 @@ public class Ledger {
         }
         Miner.LOG.log(Level.INFO,"Finished creating database tables");
     }
+
+    public ResultSet select(Connection c, String sql) {
+        Set<Peer> ret = new HashSet<Peer>();
+        Statement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = c.createStatement();
+            try {
+               rs = stmt.executeQuery(sql);
+            } catch (SQLException e) {
+                Miner.LOG.log(Level.WARNING,"Could not execute statement:\n" + sql + "\n" + e.getMessage());
+            }
+            stmt.close();
+        } catch (SQLException e) {
+            Miner.LOG.log(Level.WARNING,"Could not create statement" + e.getMessage());
+        }
+        return rs;
+    }
 }
