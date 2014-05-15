@@ -1,5 +1,7 @@
 package criptovaro;
 
+import com.sun.xml.internal.messaging.saaj.packaging.mime.util.BASE64DecoderStream;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -11,11 +13,17 @@ import java.security.MessageDigest;
 
 import java.security.NoSuchAlgorithmException;
 
+import java.sql.ResultSet;
+
+import java.sql.SQLException;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.logging.Level;
+
+import sun.misc.BASE64Decoder;
 
 public class Block implements Serializable {
     @SuppressWarnings("compatibility:-894874531013678188")
@@ -26,7 +34,13 @@ public class Block implements Serializable {
     private byte[] SolverPublicKey;
     private long blockChainPosition;
     private Transaction prize;
-    
+
+    public Block(ResultSet rs) throws IOException, SQLException {
+        
+        
+        
+    }
+
     public ArrayList<Transaction> getTransactions() 
     {
         return transactions;
@@ -225,5 +239,9 @@ public class Block implements Serializable {
     void setPrizeTransaction(Transaction prize) 
     {
         this.prize = prize;
+    }
+
+    void pushTransaction(Transaction transaction) {
+        transactions.add(transaction);
     }
 }

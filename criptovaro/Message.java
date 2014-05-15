@@ -1,7 +1,6 @@
 package criptovaro;
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
@@ -28,7 +27,7 @@ public abstract class Message implements Serializable{
     public void send(Peer p){
        try {
             Socket s = p.createSocket();
-            this.send(p, s,this);
+            Message.send(p, s,this);
             s.close();
         } catch (Exception ce) {
             PeerManager.INSTANCE.deletePeer(p);

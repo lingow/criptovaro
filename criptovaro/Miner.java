@@ -162,7 +162,7 @@ public class Miner {
                     b.setProof(peerBlock.getProof());
                     b.setBlockChainPosition(peerBlock.getBlockChainPosition());
                     b.setPreviousBlock(peerBlock.getPreviousBlockHash());
-                    b.setPrizeTransaction(new Transaction(peerBlock.getSolverPublicKey(), peerBlock.getSolverPublicKey(), BigDecimal.valueOf(100)));
+                    b.setPrizeTransaction(createPrizeTransaction(peerBlock.getSolverPublicKey()));
                     if ( !b.verify()){
                         //The proof is wrong
                         failed=true;
@@ -205,8 +205,8 @@ public class Miner {
             this.interruptWork = true;
     }
     
-    private Transaction createPrizeTransaction() {
-        return null;
+    private Transaction createPrizeTransaction(byte[] winner) {
+        return new Transaction(winner, winner ,BigDecimal.valueOf(100));
     }
 
     private void Work() 
@@ -234,7 +234,7 @@ public class Miner {
                 {
                     CurrentBlock = new Block();
                     unspentTransCache = new HashMap<byte[], ArrayList<Transaction>>();
-                    Transaction prize = new Transaction(this.currentAccount.getPublicKey(), this.currentAccount.getPublicKey(),BigDecimal.valueOf(100));
+                    Transaction prize = createPrizeTransaction(this.currentAccount.getPublicKey());
                     CurrentBlock.setPrizeTransaction(prize);
                     if(bchain.getHash() != null)
                     {
@@ -551,11 +551,11 @@ public static void main(String[] args)
     public void incomingTransaction(Transaction t) 
     {
         pool.addTransaction(t);
-    }
+}
     
     public synchronized Collection<Transaction> getPoolTransactions()
     {
         return pool.getAllTransactions();
-    }
+}
 }
 

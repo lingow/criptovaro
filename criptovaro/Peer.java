@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.Proxy;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
@@ -26,7 +25,7 @@ public class Peer {
         this.iPAddress=InetAddress.getByName(address);
     }
 
-    public String getIPAddress() {
+    public String getIPAddressString() {
         return iPAddress.toString();
     }
 
@@ -54,7 +53,10 @@ public class Peer {
      * @param p the peer to which this peer will update
      */
     public void updateTo(Peer p) {
-        
+        this.port=p.getPort();
+        this.iPAddress=p.getIPAddress();
+        this.length=p.getLength();
+        this.hash=p.getHash();
     }
 
     public boolean equals(Peer p){
@@ -62,19 +64,22 @@ public class Peer {
     }
 
     public long getLength() {
-        //TODO: Implement this method
-        return 0;
+       return this.length;
     }
 
     void setHash(byte[] hash) {
-        //TODO: Implement this method
-    }
-
-    void setlenght(int lenght) {
-        //TODO: Implement this method
+       this.hash=hash;
     }
     
-    void setLength(long lenght) {
-        //TODO: Implement this method
+    void setLength(long l) {
+        this.length=l;
+    }
+
+    private InetAddress getIPAddress() {
+        return this.iPAddress;
+    }
+
+    private byte[] getHash() {
+        return this.hash;
     }
 }

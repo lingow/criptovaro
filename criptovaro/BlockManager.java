@@ -1,5 +1,7 @@
 package criptovaro;
 
+import java.io.IOException;
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -7,8 +9,14 @@ import java.sql.PreparedStatement;
 
 import java.sql.SQLException;
 
+import java.sql.Time;
+
+import java.sql.Timestamp;
+
+import java.util.Date;
 import java.util.logging.Level;
 
+import sun.misc.BASE64Decoder;
 import sun.misc.BASE64Encoder;
 
 public class BlockManager 
@@ -68,7 +76,7 @@ public class BlockManager
                 pstmt.setString(5, encoder.encode(t.getDestination()));
                 pstmt.setDouble(6, t.getAmount().doubleValue()); //ALERT: Possible bug that loses precision in decimals by converting to double
                 pstmt.setString(7, encoder.encode(t.getDigitalSignature()));
-                pstmt.setString(8, String.valueOf(t.getTimestamp()));
+                pstmt.setTimestamp(8, new Timestamp(new Date().getTime()));
                 pstmt.setString(9, encoder.encode(t.getSpentBy())); 
                 pstmt.addBatch();
             }
@@ -173,7 +181,43 @@ public class BlockManager
 
     public Block getBlock(BlockNode bn) 
     {
-        //TODO: Implement Method
-        return null;
+        conn = Ledger.INSTANCE.connect();
+        BASE64Encoder encoder = new BASE64Encoder();
+        String selectblockID = "SELECT * FROM BLOCKS WHERE HASH=? AND LENGTH=?";
+        Block b = null;
+        try {
+            pstmt = conn.prepareStatement(selectblockID);
+            pstmt.setString(1, encoder.encode(bn.hash));
+            pstmt.setLong(2, bn.lenght);
+            rs = pstmt.executeQuery();
+            while (rs.next()){
+                b = new Block();
+                BASE64Decoder decoder = new BASE64Decoder();
+                b.setPreviousBlock(decoder.decodeBuffer(rs.getString("PREVIOUS_BLOCK_HASH")));
+                b.setBlockChainPosition(rs.getLong("LENGTH"));
+                b.setSolverPublicKey(decoder.decodeBuffer(rs.getString("SOLVERPUBLICKEY")));
+                b.setProof(rs.getLong("PROOF"));
+                String selectBlockTransactions = "SELECT * FROM TRANSACTIONS WHERE OWNING_BLOCK_ID=?";
+                PreparedStatement pstmt2 = conn.prepareStatement("SELECT * FROM TRANSACTIONS WHERE OWNING_BLOCK_ID=? ORDER BY TIMESTAMP");
+                pstmt2.setInt(1, rs.getInt("BLOCK_ID"));
+                ResultSet rs2 = pstmt2.executeQuery();
+                while (rs2.next()){
+                    Transaction t = new Transaction(rs2);
+                    if (t.getType()==TransactionType.PRIZE){
+                        b.setPrizeTransaction(t);
+                    }else{
+                        b.pushTransaction(t);
+                    }
+                }
+                rs2.close();
+            }
+            rs.close();
+            Ledger.INSTANCE.disconnect(conn);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return b;
     }
 }
