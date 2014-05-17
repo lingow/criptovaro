@@ -1,0 +1,24 @@
+create wallet -name MyWallet
+create account -alias Master
+save account
+create account -alias Secondary
+save account
+create account -alias Savings
+save account
+current wallet
+check balance -account Master
+export key -account Master
+check balance -account Secondary
+export key -account Secondary
+check balance -account Savings
+export key -account Savings
+start miner -account Master -tcp 12345 -http 8080
+stop miner
+check balance -account Master
+check balance -account Secondary
+check balance -account Savings
+add buddy -name Test1 -key Master.key
+add buddy -name Test2 -key Secondary.key
+add buddy -name Test3 -key Savings.key
+transfer funds -source Master -target Test3 -amount 99.99
+quit
