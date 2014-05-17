@@ -4,11 +4,14 @@ package criptovaro;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
+import java.net.UnknownHostException;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.logging.Level;
 
 public class PeerManager {
@@ -22,7 +25,8 @@ public class PeerManager {
      * Because this class is a singleton, the constructor should not be called directly. That's why it's private.
      * Instead, to get the instance use PeerManager.INSTANCE;
      */
-    private PeerManager() {
+    private PeerManager() 
+    {
     }
 
     /**
@@ -104,8 +108,31 @@ public class PeerManager {
     /**
      * @return A randomly selected peer from those whith the highest lenght
      */
-    public Peer getBestPeer() {
-        //TODO: Implement this method
-        return null;
+    public Peer getBestPeer() 
+    {
+        Peer result = null;
+        Random r = new Random();
+        
+        try 
+        {
+            result = new Peer(InetAddress.getLocalHost(), -1);
+           
+            for(Peer p : peerCache.values())
+            {
+                if(p.getLength() >= result.getLength())
+                {
+                    if(r.nextInt(1) == 1 || result.getLength() == -1)
+                    {
+                        result = p;
+                    }
+                }
+            }
+        } 
+        catch (UnknownHostException e) 
+        {
+            Miner.LOG.log(Level.INFO, e.toString());
+            e.printStackTrace();
+        }
+        return result;
     }
 }

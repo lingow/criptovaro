@@ -187,8 +187,8 @@ public class BlockManager
         Block b = null;
         try {
             pstmt = conn.prepareStatement(selectblockID);
-            pstmt.setString(1, encoder.encode(bn.hash));
-            pstmt.setLong(2, bn.lenght);
+            pstmt.setString(1, encoder.encode(bn.getHash()));
+            pstmt.setLong(2, bn.getLength());
             rs = pstmt.executeQuery();
             while (rs.next()){
                 b = new Block();
