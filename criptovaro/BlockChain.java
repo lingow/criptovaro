@@ -61,14 +61,14 @@ public class BlockChain {
      * @return current chain's total lenght
      */
     public int getLenght() {
-        return blockChain.peek().lenght;
+        return blockChain.peek().getLength();
     }
 
     /**
      * @return the last block's hash in this block chain
      */
     public byte[] getHash() {
-        return blockChain.peek().hash;
+        return blockChain.peek().getHash();
     }
 
     /**
@@ -83,18 +83,18 @@ public class BlockChain {
         boolean found=false;
         for (BlockNode bn : blockChain){
             if (found){
-                retMap.put(bn.hash, bn.lenght);
+                retMap.put(bn.getHash(), bn.getLength());
             }
-            if (bn.hash==hash && bn.lenght==lenght){
+            if (bn.getHash()==hash && bn.getLength()==lenght){
                 found=true;
-                retMap.put(bn.hash, bn.lenght);
+                retMap.put(bn.getHash(), bn.getLength());
             }
         }
         if (found){
            return retMap; 
         }
         for (BlockNode bn : blockChain){
-            retMap.put(bn.hash, bn.lenght);
+            retMap.put(bn.getHash(), bn.getLength());
         }
         return retMap;
     }
@@ -120,7 +120,7 @@ public class BlockChain {
      * @param tp the transaction pool
      */
     void merge(BlockNode commonNode, LinkedHashMap<BlockNode, Block> peerBlocks,TransactionPool tp) {
-        if ( commonNode.lenght + peerBlocks.size() > getLenght()){
+        if ( commonNode.getLength() + peerBlocks.size() > getLenght()){
             while(true){
                 if (! blockChain.peek().equals(commonNode)){
                     tp.addTransactionList(rollbackBlock());
@@ -133,5 +133,29 @@ public class BlockChain {
                 appendBlock(b);
             }
         }
+    }
+    
+    public Block getNextBlock(byte[] hash, int length) 
+    {
+        Block result = null;
+        boolean found = false;
+        BlockNode target = new BlockNode(length, hash);
+        Collection<BlockNode> backwardsBChain = this.getBackwardsBlockChain();
+            
+        for(BlockNode b : backwardsBChain)
+        {
+            if(found)
+            {
+                result = bm.getBlock(b);;
+            }
+            
+            if(b.equals(target))
+            {
+                //Found the base block. Next item in the collection has the result we want
+                found = true;
+            }
+        }
+            
+        return result;
     }
 }

@@ -3,12 +3,12 @@ package criptovaro;
 /**This guy represents each element of the block chain which we actually conserve in memory
  */
 public class BlockNode {
-    public int lenght;
-    public byte[] hash;
+    private int length;
+    private byte[] hash;
 
-    public BlockNode(int lenght, byte[] hash) {
+    public BlockNode(int length, byte[] hash) {
         super();
-        this.lenght = lenght;
+        this.length = length;
         this.hash = hash;
     }
 
@@ -17,6 +17,22 @@ public class BlockNode {
     }
     
     public boolean equals(BlockNode b){
-        return this.lenght==b.lenght && this.hash.equals(b.hash); 
+        return this.length==b.length && this.hash.equals(b.hash); 
+    }
+
+    public int getLength() {
+        return length;
+    }
+
+    public void setLength(int length) {
+        this.length = length;
+    }
+
+    public byte[] getHash() {
+        return hash;
+    }
+
+    public void setHash(byte[] hash) {
+        this.hash = hash;
     }
 }

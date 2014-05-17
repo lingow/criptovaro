@@ -119,9 +119,9 @@ public class Miner {
                 //First look for where we are in the incoming branch
                 BlockNode commonNode = null;
                 for(BlockNode bn : bchain.getBackwardsBlockChain()){
-                    Integer i = peerBranchHash.get(bn.hash);
+                    Integer i = peerBranchHash.get(bn.getHash());
                     if ( i != null){
-                        BlockNode peerNode = new BlockNode(i,bn.hash);
+                        BlockNode peerNode = new BlockNode(i,bn.getHash());
                         if (bn.equals(peerNode)){
                             commonNode = bn;
                         }
@@ -136,7 +136,7 @@ public class Miner {
                 //Now form the BlockNode list 
                 List<BlockNode> peerBranch = new ArrayList<>();
                 for(Map.Entry<byte[],Integer> entry:peerBranchHash.entrySet()){
-                    if ( entry.getValue().intValue() > commonNode.lenght){
+                    if ( entry.getValue().intValue() > commonNode.getLength()){
                         peerBranch.add(new BlockNode(entry.getValue().intValue(),entry.getKey()));
                     }
                 }
@@ -145,7 +145,7 @@ public class Miner {
                 HashMap<byte[], ArrayList<Transaction>> unspentCache = new HashMap<byte[], ArrayList<Transaction>>();
                 boolean failed=true;
                 for( BlockNode bn : peerBranch){
-                    Block peerBlock = (new BlockRequest(bn.hash, bn.lenght)).request(bestPeer);
+                    Block peerBlock = (new BlockRequest(bn.getHash(), bn.getLength())).request(bestPeer);
                     if (peerBlock == null){
                         //It's a Trap!
                         failed=true;
@@ -527,12 +527,12 @@ public static void main(String[] args)
     /**
      * This retrieves from the block that follows from the one with the provided hash and lenght
      * @param hash the hash of the known block
-     * @param lenght the lenght of the known block
+     * @param length the lenght of the known block
      * @return the following block from the one with the provided hash and lenght, or null if we dont have that block 
      */
-    public Block getNextBlock(byte[] hash, int lenght) {
-        //TODO: Implement this Method
-        return null;
+    public Block getNextBlock(byte[] hash, int length) 
+    {
+        return bchain.getNextBlock(hash, length);
     }
 
 
