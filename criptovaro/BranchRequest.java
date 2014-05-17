@@ -1,8 +1,10 @@
 package criptovaro;
 
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
 
-public class BranchRequest extends Request<LinkedHashMap<byte[],Integer>>{
+public class BranchRequest extends Request<LinkedList<BlockNode>>{
     @SuppressWarnings("compatibility:8423995755533858870")
     private static final long serialVersionUID = 1L;
     private byte[] hash;
@@ -14,7 +16,7 @@ public class BranchRequest extends Request<LinkedHashMap<byte[],Integer>>{
     }
 
     @Override
-    protected LinkedHashMap<byte[], Integer> generateReply(Peer p) {
+    protected LinkedList<BlockNode> generateReply(Peer p) {
         return Miner.INSTANCE.getChainBranch(hash,lenght);
     }
 

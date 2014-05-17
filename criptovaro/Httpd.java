@@ -13,8 +13,8 @@ public class Httpd extends Thread
 {
     private int port;
     private HttpServer server = null;
-    private String dashboardPath = System.getProperty("user.dir") +  File.separator + "criptovaro" + File.separator + 
-                                   "public_html" + File.separator +"dashboard.html"; //TODO: Change this path to something less fragile
+    private String dashboardPath = System.getProperty("user.dir") +  File.separator + "criptovaro4" + File.separator + 
+                                   "public_html";
     private int connectionBacklog = 0; //System default. Adjust as necessary.
     
     public Httpd(int web_port)
@@ -27,10 +27,7 @@ public class Httpd extends Thread
         try
         {
             server = HttpServer.create(new InetSocketAddress(port), connectionBacklog);
-            server.createContext("/Dashboard", new DashboardHandler(dashboardPath));
-            server.createContext("/PeerData", new PeerHandler());
-            server.createContext("/BlockData", new BlockHandler());
-            server.createContext("/TransactionData", new TransactionHandler());
+            server.createContext("/", new DashboardHandler(dashboardPath));
             server.setExecutor(null);
             server.start();
             

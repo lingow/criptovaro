@@ -36,6 +36,7 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -115,7 +116,10 @@ public class Miner {
     }
             if (bchain.getLenght() < bestPeer.getLength()){
                 // He Wins
-                LinkedHashMap<byte[],Integer> peerBranchHash = (new BranchRequest(bchain.getHash(),bchain.getLenght())).request(bestPeer);
+                LinkedHashMap<byte[],Integer> peerBranchHash = new LinkedHashMap<byte[],Integer>();
+                for (BlockNode bn : (new BranchRequest(bchain.getHash(),bchain.getLenght())).request(bestPeer)){
+                    peerBranchHash.put(bn.hash, bn.lenght);
+                }
                 //First look for where we are in the incoming branch
                 BlockNode commonNode = null;
                 for(BlockNode bn : bchain.getBackwardsBlockChain()){
@@ -543,7 +547,7 @@ public static void main(String[] args)
      * @param lenght The lenght of the block where the chain will begin
      * @return a LinkedHashMap mapping block hashes to block lenght
      */
-    public LinkedHashMap<byte[], Integer> getChainBranch(byte[] hash, int lenght) 
+    public LinkedList<BlockNode> getChainBranch(byte[] hash, int lenght) 
     {
         return bchain.getChainBranch(hash,lenght);
     }

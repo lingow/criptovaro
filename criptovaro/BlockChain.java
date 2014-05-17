@@ -74,27 +74,27 @@ public class BlockChain {
     /**
      * @param hash The hash of the block from where we should begin
      * @param lenght The lenght of the block from where we should begin
-     * @return the hashes and lenghts of the block chain in order starting from the specified hash and lenght 
-     * in the form of a LinkedHashMap it returns every value in the block chain in the case the specified hash 
+     * @return the hashes and lenghts of the block chain in order starting from the specified hash and lenght
+     * in the form of a LinkedHashMap it returns every value in the block chain in the case the specified hash
      * and lenght are not found
      */
-    LinkedHashMap<byte[], Integer> getChainBranch(byte[] hash, int lenght) {
-        LinkedHashMap<byte[], Integer> retMap= new LinkedHashMap<byte[], Integer>();
+    public LinkedList<BlockNode> getChainBranch(byte[] hash, int lenght) {
+        LinkedList<BlockNode> retMap= new LinkedList<BlockNode>();
         boolean found=false;
         for (BlockNode bn : blockChain){
             if (found){
-                retMap.put(bn.hash, bn.lenght);
+                retMap.add(bn);
             }
             if (bn.hash==hash && bn.lenght==lenght){
                 found=true;
-                retMap.put(bn.hash, bn.lenght);
+                retMap.add(bn);
             }
         }
         if (found){
            return retMap; 
         }
         for (BlockNode bn : blockChain){
-            retMap.put(bn.hash, bn.lenght);
+            retMap.add(bn);
         }
         return retMap;
     }
