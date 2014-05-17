@@ -1,0 +1,1 @@
+window.alert("Blocks.js");

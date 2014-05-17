@@ -92,7 +92,7 @@ public class Ledger {
         Connection c = null;
         Set<Peer> ret = new HashSet<Peer>();
         Statement stmt = null;
-        String sql = "SELECT * FROM PEERS;";
+        String sql = "SELECT * FROM PEERS ORDER BY IP,PORT;";
         c = connect();
         try {
             stmt = c.createStatement();
