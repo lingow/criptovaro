@@ -138,6 +138,7 @@ public class Client {
     public Transaction transferFunds(byte source[], String buddy, BigDecimal amount) {
         byte[] target = null;
         target = getBuddiesKey(buddy);
+        System.out.println("Transferring "+amount+" to buddy "+target+".");
         Transaction transaction = new Transaction(source, target, amount);
         //(new TransactionMessage(transaction)).bcast();
         System.out.println("Funds transferred.");
@@ -205,39 +206,55 @@ public class Client {
             System.out.println("Could not add buddy.");
         }
     }
-    
+
     public byte[] getBuddiesKey(String buddy) {
         File file = null;
-        FileReader fr = null;
-        BufferedReader br = null;
+        //FileReader fr = null;
+        //BufferedReader br = null;
         byte[] decodedKey = null;
         String key = null;
 
         try {
             file = new File("buddies.txt");
-            fr = new FileReader(file);
-            br = new BufferedReader(fr);
+            //fr = new FileReader(file);
+            //br = new BufferedReader(fr);
+            //String line = null;
 
-            String line;
-            while ((line = br.readLine()) != null) {
-                System.out.println(line);
-                if(buddy.equals(line.substring(0,line.indexOf(",")))) {
-                    key = line.substring(line.indexOf(","));
-                    System.out.println("key: "+key);
+            String[] buddyInfo = null;
+            System.out.println("buddy: "+buddy);
+            try(BufferedReader br = new BufferedReader(new FileReader(file))) {
+                for(String line; (line = br.readLine()) != null; ) {
+                    System.out.println(line);
+                    buddyInfo = line.split(",");
+                    if(buddy.equals(buddyInfo[0])) {
+                        System.out.println("buddyinfo[0]: "+buddyInfo[0]);
+                        System.out.println("buddyinfo[1]: "+buddyInfo[1]);
+                        key = buddyInfo[1];
+                    }
+                    // process the line.
                 }
-                
+                // line is not visible here.
             }
+            
+            //while ((line = br.readLine()) != null) {
+            ///    System.out.println(line);
+            //    buddyInfo = line.split(",");
+            //    if(buddy.equals(buddyInfo[0])) {
+            //        key = buddyInfo[1];
+            //    }
+            //}
         } catch (Exception e) {
                 e.printStackTrace();
-        } finally {
-            try {
-                 if (null != fr) {
-                    fr.close();
-                }
-            } catch (Exception e2) {
-                e2.printStackTrace();
-            }
-        }
+        } //finally {
+          //  try {
+          //       if (null != fr) {
+          //          fr.close();
+          //      }
+            //} catch (Exception e2) {
+            //    e2.printStackTrace();
+            //}
+        //}
+        System.out.println("buddie's key: "+key);
         
         BASE64Decoder d = new BASE64Decoder();
         
@@ -668,13 +685,11 @@ public class Client {
                                 System.out.println("Buddy added.");
                                 break;
                             case "transfer funds":
-                                //
                                 System.out.println("Transfer funds.");
                                 byte source[] = null;
-                                
                                 String target = null;
-                                int transferAmount = 0;
                                 BigDecimal amount = null; 
+                            
                                 try {
                                     for(int i=0; i<args.length-1;i++) {
                                         if(args[i].equalsIgnoreCase("-source")) {
@@ -682,14 +697,17 @@ public class Client {
                                         } else if(args[i].equalsIgnoreCase("-target")) {
                                             target = args[i+1];
                                         } else if(args[i].equalsIgnoreCase("-amount")) {
-                                            transferAmount = Integer.parseInt(args[i+1]);
-                                            amount = new BigDecimal(transferAmount);
+                                            amount = new BigDecimal(args[i+1]);
                                         }
                                     }
                                 } catch(NullPointerException np) {
                                     System.out.println("Please specify a wallet alias.");
                                     break;
+                                } catch(NumberFormatException nf) {
+                                    System.out.println("Please enter a valid amount.");
+                                    break;        
                                 }
+                            
                                 transferFunds(source, target, amount);
                                 break;
                             case "start miner":
