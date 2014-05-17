@@ -1,7 +1,16 @@
 package criptovaro;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.Writer;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -110,7 +119,32 @@ public class Wallet {
         //if path exists and alias exists and account exists, remove row from table wallet
     }
 
-    public void getAccount(String name) {
+  
+    
+    public void addBuddy(String buddy, Path keyFile) throws IOException {
+        if(Files.notExists(keyFile)) {
+            return;
+        }
+        String key = null;
+        
+        //Reads the key in the key file.
+        try(BufferedReader br = new BufferedReader(new FileReader(keyFile.toString()))) {
+                StringBuilder sb = new StringBuilder();
+                key = br.readLine();
+                System.out.println(key);
+        }
+        
+        //Creates a file with the list of buddies.
+        Writer writer = null;
+        try {
+            writer = new BufferedWriter(new OutputStreamWriter(
+                  new FileOutputStream("wallets/buddies.txt"), "utf-8"));
+            writer.write(buddy+","+key);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        } finally {
+            writer.close();
+        }
         
     }
 

@@ -144,7 +144,7 @@ public class Miner {
                         if(tm.validateTransaction(newTran))
                         {
                             //First we check Ledger for unspent transactions to solvent this transaction
-                            funds = tm.getTransactionFunds(newTran);
+                            funds = tm.getTransactionFunds(newTran.getSource());
                                 
                             /*
                              * If the ledger indicates there are not enough funds. Ideally we want to check the current 

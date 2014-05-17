@@ -42,8 +42,9 @@ public class TransactionManager{
      *             output transaction.
      * On failure: returns null, logs error.
      */
-    public ArrayList<Transaction> getTransactionFunds(Transaction tran)
+    public ArrayList<Transaction> getTransactionFunds(byte[] publicKey)
     {
-        return null;
+        ArrayList<Transaction> transactions = new ArrayList<Transaction>();
+        return transactions;
     }
 }
