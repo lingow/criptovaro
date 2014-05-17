@@ -118,7 +118,7 @@ public class Miner {
                 // He Wins
                 LinkedHashMap<byte[],Integer> peerBranchHash = new LinkedHashMap<byte[],Integer>();
                 for (BlockNode bn : (new BranchRequest(bchain.getHash(),bchain.getLenght())).request(bestPeer)){
-                    peerBranchHash.put(bn.hash, bn.lenght);
+                    peerBranchHash.put(bn.getHash(), bn.getLength());
                 }
                 //First look for where we are in the incoming branch
                 BlockNode commonNode = null;
