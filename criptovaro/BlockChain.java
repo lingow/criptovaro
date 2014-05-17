@@ -78,23 +78,23 @@ public class BlockChain {
      * in the form of a LinkedHashMap it returns every value in the block chain in the case the specified hash 
      * and lenght are not found
      */
-    LinkedHashMap<byte[], Integer> getChainBranch(byte[] hash, int lenght) {
-        LinkedHashMap<byte[], Integer> retMap= new LinkedHashMap<byte[], Integer>();
+    public LinkedList<BlockNode> getChainBranch(byte[] hash, int lenght) {
+        LinkedList<BlockNode> retMap= new LinkedList<BlockNode>();
         boolean found=false;
         for (BlockNode bn : blockChain){
             if (found){
-                retMap.put(bn.getHash(), bn.getLength());
+                retMap.add(bn);
             }
             if (bn.getHash()==hash && bn.getLength()==lenght){
                 found=true;
-                retMap.put(bn.getHash(), bn.getLength());
+                retMap.add(bn);
             }
         }
         if (found){
            return retMap; 
         }
         for (BlockNode bn : blockChain){
-            retMap.put(bn.getHash(), bn.getLength());
+            retMap.add(bn);
         }
         return retMap;
     }
@@ -147,7 +147,7 @@ public class BlockChain {
             if(found)
             {
                 result = bm.getBlock(b);;
-            }
+}
             
             if(b.equals(target))
             {

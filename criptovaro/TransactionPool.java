@@ -1,40 +1,44 @@
 package criptovaro;
 
+import java.math.BigDecimal;
+
 import java.util.Collection;
 import java.util.ArrayList;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
-public class TransactionPool extends ConcurrentLinkedDeque<Transaction> {
+public class TransactionPool {
 
+    ConcurrentLinkedDeque<Transaction> pool;
     public TransactionPool(){
         super();
+        pool = new ConcurrentLinkedDeque<Transaction>();
     }
     public void addTransaction(Transaction tran) {
-        this.add(tran);
+        pool.add(tran);
     }
 
     public void addTransactionList(Collection<Transaction> transactions) {
-        this.addAll(transactions);
+        pool.addAll(transactions);
     }
 
     public Transaction consumeTransaction() {
-        return this.remove();
+        return pool.remove();
     }
 
     public int getPoolLength() {
-        return this.size();
+        return pool.size();
     }
 
     public void removeIfExist(Collection<Transaction> transaction) 
     {
     
-        this.removeFirstOccurrence(transaction);
+        pool.removeFirstOccurrence(transaction);
     }
     
     public ArrayList<Transaction> getAllTransactions()
     {
-        return null;    
+        return new ArrayList(pool);    
     }
 }
