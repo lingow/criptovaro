@@ -13,7 +13,7 @@ public class Httpd extends Thread
 {
     private int port;
     private HttpServer server = null;
-    private String dashboardPath = System.getProperty("user.dir") +  File.separator + "criptovaro4" + File.separator + 
+    private String dashboardPath = System.getProperty("user.dir") +  File.separator + "criptovaro" + File.separator + 
                                    "public_html";
     private int connectionBacklog = 0; //System default. Adjust as necessary.
     

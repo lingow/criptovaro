@@ -1,0 +1,5 @@
+help
+create wallet -path lingow -name lingow
+create account -name lingowacc1 -alias lingowalias
+save account
+quit
