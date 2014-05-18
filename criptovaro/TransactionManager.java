@@ -64,6 +64,7 @@ public class TransactionManager{
      *             output transaction.
      * On failure: returns null, logs error.
      */
+    
     public ArrayList<Transaction> getAccountFunds(byte[] account)
     {
         ArrayList<Transaction> retList = new ArrayList<Transaction>();
