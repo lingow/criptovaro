@@ -79,6 +79,14 @@
             <url n="runDirectoryURL" path="../"/>
             <url n="targetURL" path="classes/criptovaro/Client.class"/>
          </hash>
+         <hash n="Client startMiner">
+            <value n="allowInput" v="true"/>
+            <value n="custom" v="false"/>
+            <value n="name" v="Client startMiner"/>
+            <value n="programArguments" v="-f criptovaro/tst/startMiner.txt"/>
+            <url n="runDirectoryURL" path="../"/>
+            <url n="targetURL" path="classes/criptovaro/Client.class"/>
+         </hash>
          <hash n="Client test1">
             <value n="allowInput" v="true"/>
             <value n="custom" v="false"/>
@@ -102,6 +110,7 @@
       </hash>
       <list n="runConfigurationList">
          <string v="Client"/>
+         <string v="Client startMiner"/>
          <string v="Client test1"/>
          <string v="Default"/>
          <string v="MinerTest"/>

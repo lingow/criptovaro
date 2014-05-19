@@ -90,7 +90,7 @@ public class Wallet {
         saveToWallet(acc);
     }
     
-    public int getMinerPid(String accountAlias) {
+    public long getMinerPid(String accountAlias) {
         try {
             return accounts.get(accountAlias).getMinerPid();
         } catch (NullPointerException e) {
@@ -254,7 +254,7 @@ public class Wallet {
             pstmt.setString(2, encodedPublicKey);
             pstmt.setString(3,alias);
             if ( account.getMinerPid() > 0){
-                pstmt.setInt(4, account.getMinerPid());
+                pstmt.setLong(4, account.getMinerPid());
             }else{
                 pstmt.setNull(4, Types.NULL);
             }

@@ -1,0 +1,3 @@
+use wallet MyWallet.wallet
+start miner -account Master
+quit
