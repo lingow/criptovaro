@@ -41,7 +41,6 @@ import sun.misc.BASE64Decoder;
 import sun.misc.BASE64Encoder;
 
 public class Client {
-    Wallet wallet = null;
     Wallet currentWallet = null;
     Account activeAccount = null;
     Path currentPath = null;
@@ -51,72 +50,8 @@ public class Client {
     }
     
     //Status: Completed
-    private Wallet createWallet(Path dir, String walletName) {
-        System.out.println("createWallet("+dir.toString()+", "+walletName+")");
-        //Validates the arguments.
-        //If the directory is empty, it assigns the default directory.
-        //If the wallet name is empty, it returns an error.
-        if(dir == null) {
-            dir = Paths.get("wallets");
-            return null;
-        } else if (walletName == null) {
-            System.out.println("Please specify a wallet alias.");
-            return null;
-        }
-        
-        //Formats the wallet directory by trimming ending slashes "/"
-        String filepath = dir.toString();
-        if(filepath.endsWith("/")) {
-            filepath = filepath.substring(0,filepath.length()-filepath.length());
-            dir = Paths.get(filepath);
-        }
-        
-        //Sets the wallet path to the default directory.
-        if(filepath.equals("wallets")) {
-           dir = Paths.get("wallets").toAbsolutePath(); 
-        } 
-        
-        //Validates if a wallet file already exists.
-        if(!Files.notExists(Paths.get(dir.toString()+"/"+walletName+".wallet"))) {
-            System.out.println("Wallet file already exists.");
-            return null;
-        }
-        
-        //Validates if the directory exists. If it doesn't, the client creates it.
-        //If there's an error, it falls back to the default directory.
-        if(Files.notExists(dir)){
-            try {
-                Files.createDirectory(dir);
-            } catch (IOException e) {
-                System.out.println("Directory could not be created.");
-                dir = Paths.get("wallets");
-                dir = dir.toAbsolutePath();
-                e.printStackTrace();
-            }
-        } 
-        
-        System.out.println("Attempting to create wallet "+walletName+" at path \'"+dir.toString()+"\'");
-        dir = Paths.get(filepath+"/"+walletName+".wallet");
-        
-        //Creates the wallet
-        wallet = new Wallet(dir);
-        System.out.println("Wallet created: "+dir.toAbsolutePath().toString());
-        return wallet;    
-    }
-    
-    //Status: Completed
-    private void useWallet() {
-        if(wallet != null) {
-            currentWallet = wallet;
-            System.out.println("Using wallet: "+currentWallet.getWalletFile().toAbsolutePath());
-        }
-    }
-    
-    //Status: Completed
     private void useWallet(Path path) {
-        wallet = new Wallet();
-        wallet.setWalletFile(path);
-        currentWallet = wallet;
+        currentWallet = new Wallet(path.toString());
         System.out.println("Using wallet: "+currentWallet.getWalletFile().toAbsolutePath());
     }
     
@@ -323,18 +258,18 @@ public class Client {
         
         minerPid = obtainMinerPid();
         if(minerPid!=0) {
-            wallet.setMinerPid(minerPid);
+            currentWallet.setMinerPid(minerPid);
         }
         System.out.println("Miner started. Use command stop miner to stop the Criptovaro miner.");
         return true;
     }
    
     //Status: Completed
-    private boolean stopMiner() {
+    private boolean stopMiner(String accountAlias) {
         System.out.println("Stoping Criptovaro miner...");
         Runtime rt = Runtime.getRuntime();
         Process p = null;
-        int pid = wallet.getMinerPid();
+        int pid = currentWallet.getMinerPid(accountAlias);
         
         String command[] = {"kill","-s TERM"+Integer.toString(pid)};
        
@@ -402,46 +337,12 @@ public class Client {
                 case "help":
                     printHelp();
                     break;
-                case "create wallet":
-                    System.out.println("Creating wallet...");
-                    Path walletPath = Paths.get("wallets");
-                    String walletName = null;
-                    try {
-                        for (int i = 0; i < args.length - 1; i++) {
-                            if (args[i].equalsIgnoreCase("-path")) {
-                                walletPath = Paths.get(args[i + 1]);
-                            } else if (args[i].equalsIgnoreCase("-name")) {
-                                walletName = args[i + 1];
-                            }
-                        }
-                    } catch (NullPointerException np) {
-                        System.out.println("Please specify a wallet alias.");
-                        break;
-                    }
-                    createWallet(walletPath, walletName);
-                    currentWallet = wallet;
-                    break;
                 case "use wallet":
-                    System.out.println("Opening wallet...");
-                    if ((args.length == 0 || args == null) && wallet != null) {
-                        useWallet();
-                        break;
+                    if (args == null){
+                        System.out.println("Please specify a path");
+                    }else{
+                        currentWallet = new Wallet(args[0]);
                     }
-                    Path path = null;
-                    try {
-                        if (args[0].equalsIgnoreCase("-path")) {
-                            path = Paths.get(args[1]).toAbsolutePath();
-                            if (path == null) {
-                                System.out.println("Please specify a wallet path.");
-                                break;
-                            }
-                        } else {
-                            break;
-                        }
-                    } catch (NullPointerException np) {
-                        System.out.println("Please specify a wallet path.");
-                    }
-                    useWallet(path);
                     break;
                 case "current wallet":
                     args = null;
@@ -596,21 +497,15 @@ public class Client {
                     } else if (walletFilepath != null && all == true && alias == null) {
                         //check balance -wallet <wallet> -all
                         //ToDo: Verify that filepath exists.
-                        Wallet wallet = new Wallet();
-                        wallet.setWalletFile(walletFilepath);
-                        ArrayList<Account> walletAccounts = new ArrayList<Account>();
-                        walletAccounts = wallet.getAccounts();
-                        checkBalance(walletAccounts);
+                        Wallet wallet = new Wallet(walletFilepath.toString());
+                        checkBalance(wallet.getAccounts());
                     } else if (walletFilepath != null && alias != null && all == false) {
                         //check balance -wallet <wallet> -account <alias>
                         //ToDo: Verify that filepath exists.
-                        Wallet wallet = new Wallet();
-                        wallet.setWalletFile(walletFilepath);
-                        ArrayList<Account> walletAccounts = new ArrayList<Account>();
-                        walletAccounts = wallet.getAccounts();
-                        for (Account account : walletAccounts) {
-                            if (account.getAlias().equals(alias)) {
-                                checkBalance(account);
+                        Wallet wallet = new Wallet(walletFilepath.toString());
+                        for (Account acc : wallet.getAccounts()) {
+                            if (acc.getAlias().equals(alias)) {
+                                checkBalance(acc);
                             }
                         }
                     }
@@ -746,7 +641,11 @@ public class Client {
                     startMiner(publicKey, privateKey, tcpPort, httpPort);
                     break;
                 case "stop miner":
-                    stopMiner();
+                    if (args != null){
+                        stopMiner(args[0]);
+                    } else {
+                        System.out.println("Please provide an account alias of which to stop its Miner");
+                    }
                     break;
                 default:
                     System.out.println("Not a valid command.");
@@ -759,8 +658,8 @@ public class Client {
         
     private static void printHelp() {
         System.out.println("List of commands: ");
-        System.out.println("create wallet [-path <Wallet path>] [-name <Wallet filename>]");    
-        System.out.println("\t Creates a wallet file with the specified name in the specified path, and sets it as the current wallet.\n");
+        System.out.println("use wallet [-path <Wallet path>]");    
+        System.out.println("\t Creates or selects a wallet file with in the specified path, and sets it as the current wallet.\n");
         System.out.println("create account [-name <Account name>]");
         System.out.println("\t Creates an account, specifies an alias for easy reference, and sets the account as the current account.\n");
         System.out.println("save account");

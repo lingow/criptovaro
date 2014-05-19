@@ -1,11 +1,10 @@
-create wallet -name MyWallet
+use wallet MyWallet.wallet
 create account -alias Master
 save account
 create account -alias Secondary
 save account
 create account -alias Savings
 save account
-current wallet
 check balance -account Master
 export key -account Master
 check balance -account Secondary

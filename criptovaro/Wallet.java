@@ -29,20 +29,16 @@ import javax.xml.transform.Result;
 
 public class Wallet {
     private int pid;
-    private Path filepath;
+    private File file;
     ArrayList<Account> accounts;
     
-    public Wallet() {
-        pid = 0;
-        filepath = null;
-        accounts = new ArrayList<Account>();
-    }
-    
-    public Wallet(Path filepath) {
-        this.filepath = filepath;
+    public Wallet(String filepath) {
+        file = new File(filepath).getAbsoluteFile();
+        file.getParentFile().mkdirs();
+        System.out.println("Creating or loading Wallet in " + file.getAbsolutePath());
         Statement stmt = null;
         
-        String queries[] = {"CREATE TABLE ACCOUNTS " +
+        String queries[] = {"CREATE TABLE IF NOT EXISTS ACCOUNTS " +
                             "( PRIVATEKEY VARCHAR(1024) NOT NULL " +
                             ", PUBLICKEY VARCHAR(1024) NOT NULL " +
                             ", MINERPID NUMBER " +
@@ -53,12 +49,12 @@ public class Wallet {
                             ", CONSTRAINT ACCOUNTS_UK2 UNIQUE ( MINERPORT ) " +
                             ", CONSTRAINT ACCOUNTS_UK3 UNIQUE ( PRIVATEKEY, PUBLICKEY ) " +
                             ");",
-                            "CREATE INDEX ACCOUNTS_INDEX1 ON ACCOUNTS ( ALIAS);"
+                            "CREATE INDEX IF NOT EXISTS ACCOUNTS_INDEX1 ON ACCOUNTS ( ALIAS);"
                             };
 
         Connection connection = null;
         try {
-            connection = connect(filepath);
+            connection = connect(file.toPath().toAbsolutePath());
             for (String sql : queries){
                 try {
                     stmt = connection.createStatement();
@@ -68,6 +64,7 @@ public class Wallet {
                     e.printStackTrace();
                 }
             }
+            accounts = getAccounts();
         } catch (Exception e) {
             System.out.println("Error connecting to database.");
             e.printStackTrace();
@@ -77,18 +74,18 @@ public class Wallet {
     }
     
     public void setWalletFile(Path filepath) {
-        this.filepath = filepath;
+        this.file = new File(filepath.toString());
     }
     
     public Path getWalletFile() {
-        return filepath;
+        return file.toPath().toAbsolutePath();
     }
     
     public void setMinerPid(int pid) {
         this.pid = pid;
     }
     
-    public int getMinerPid() {
+    public int getMinerPid(String accountAlias) {
         return pid;
     }
     
@@ -148,7 +145,7 @@ public class Wallet {
         
     }
 
-    public ArrayList getAccounts() {
+    public ArrayList<Account> getAccounts() {
         Statement stmt = null;
         String encodedPrivateKey = null;
         String encodedPublicKey = null;
@@ -160,9 +157,8 @@ public class Wallet {
         String sql = "SELECT * FROM ACCOUNTS;";
         ArrayList<Account> walletAccounts = new ArrayList<Account>();
         
-        Connection connection = null;
-        filepath = filepath.toAbsolutePath();
-        connection = connect(filepath);
+        Connection connection = null;;
+        connection = connect(file.toPath().toAbsolutePath());
         try {
             stmt = connection.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
