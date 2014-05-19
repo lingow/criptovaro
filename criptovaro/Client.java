@@ -3,13 +3,12 @@ package criptovaro;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.io.IOException;
+
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
@@ -358,204 +357,198 @@ public class Client {
     public Transaction[] listTransactions(String args[]) {
         return null;
     }
-    
-    private void executePrompt(InputStream is) {
-        try (Scanner scanner = new Scanner(is)) {
-                    boolean running = true;
-                    Scanner sc = null;
-                    File file = new File("test.txt");
-                    String input = null;
-                    while (running) {
-                        System.out.println("Type 'help' to see a list of commands or 'quit' to end.");
-                        try {
-                            sc = new Scanner(file);
-                        } catch (FileNotFoundException e) {
-                            e.printStackTrace();
-                        }
-                        while (sc.hasNextLine()) {
-                            input = sc.nextLine().trim();
 
-                        //String input = scanner.nextLine().trim();
-                        String command = input.toLowerCase();
-                        String typed[] = null;
-                        String args[] = null;
-                       
-                        //Extract command
-                        if(command.startsWith("quit")) {
-                            command = "quit";
-                        } else if (command.startsWith("help")) {
-                            command = "help";  
-                        } else {
-                            typed = command.split("\\s+");
-                            command = typed[0] + " " + typed[1];
+    private void executePrompt(InputStream is) {
+        Scanner sc = new Scanner(is);
+        boolean running = true;
+
+        while (running) {
+            System.out.println("Type 'help' to see a list of commands or 'quit' to end.");
+            String input;
+            while (sc.hasNextLine()) {
+                input = sc.nextLine().trim();
+
+                //String input = scanner.nextLine().trim();
+                String command = input.toLowerCase();
+                String typed[] = null;
+                String args[] = null;
+
+                //Extract command
+                if (command.startsWith("quit")) {
+                    command = "quit";
+                } else if (command.startsWith("help")) {
+                    command = "help";
+                } else {
+                    typed = command.split("\\s+");
+                    command = typed[0] + " " + typed[1];
+                }
+                System.out.println("command: " + command);
+
+                //Extract arguments
+                String arguments = null;
+                int commandLength = command.length();
+                arguments = input.substring(commandLength).trim();
+                if (arguments.length() == 0) {
+                    args = null;
+                } else {
+                    args = arguments.split("\\s+");
+                }
+                System.out.println("arguments: " + arguments);
+
+                switch (command) {
+                case "quit":
+                    running = false;
+                    break;
+                case "help":
+                    printHelp();
+                    break;
+                case "create wallet":
+                    System.out.println("Creating wallet...");
+                    Path walletPath = Paths.get("wallets");
+                    String walletName = null;
+                    try {
+                        for (int i = 0; i < args.length - 1; i++) {
+                            if (args[i].equalsIgnoreCase("-path")) {
+                                walletPath = Paths.get(args[i + 1]);
+                            } else if (args[i].equalsIgnoreCase("-name")) {
+                                walletName = args[i + 1];
+                            }
                         }
-                        System.out.println("command: "+command);
-                        
-                        //Extract arguments
-                        String arguments = null;
-                        int commandLength = command.length();
-                        arguments = input.substring(commandLength).trim();
-                        if(arguments.length() == 0) {
-                            args = null;
+                    } catch (NullPointerException np) {
+                        System.out.println("Please specify a wallet alias.");
+                        break;
+                    }
+                    createWallet(walletPath, walletName);
+                    currentWallet = wallet;
+                    break;
+                case "use wallet":
+                    System.out.println("Opening wallet...");
+                    if ((args.length == 0 || args == null) && wallet != null) {
+                        useWallet();
+                        break;
+                    }
+                    Path path = null;
+                    try {
+                        if (args[0].equalsIgnoreCase("-path")) {
+                            path = Paths.get(args[1]).toAbsolutePath();
+                            if (path == null) {
+                                System.out.println("Please specify a wallet path.");
+                                break;
+                            }
                         } else {
-                            args = arguments.split("\\s+");
+                            break;
                         }
-                        System.out.println("arguments: "+ arguments);
-                       
-                        switch (command) {
-                            case "quit":
-                                running = false;
-                                break;
-                            case "help":
-                                printHelp();
-                                break;
-                            case "create wallet":
-                                System.out.println("Creating wallet...");
-                                Path walletPath = Paths.get("wallets");
-                                String walletName = null;
-                                try {
-                                    for(int i=0; i<args.length-1;i++) {
-                                        if(args[i].equalsIgnoreCase("-path")) {
-                                            walletPath = Paths.get(args[i+1]);
-                                        } else if(args[i].equalsIgnoreCase("-name")) {
-                                            walletName = args[i+1];
-                                        }
-                                    }
-                                } catch(NullPointerException np) {
-                                    System.out.println("Please specify a wallet alias.");
-                                    break;
-                                }
-                                createWallet(walletPath, walletName);
-                                currentWallet = wallet;
-                                break;
-                            case "use wallet":
-                                System.out.println("Opening wallet...");
-                                if((args.length == 0 || args == null) && wallet!=null) {
-                                    useWallet();
-                                    break;
-                                }
-                                Path path = null;
-                                try {
-                                    if(args[0].equalsIgnoreCase("-path")) {
-                                        path = Paths.get(args[1]).toAbsolutePath();
-                                        if(path == null) {
-                                            System.out.println("Please specify a wallet path.");
-                                            break;
-                                        }
-                                    } else {
-                                        break;
-                                    }
-                                } catch(NullPointerException np) {
-                                    System.out.println("Please specify a wallet path.");
-                                }
-                                useWallet(path);
-                                break;
-                            case "current wallet":
-                                args = null;
-                                if(currentWallet == null) {
-                                    System.out.println("There is no current wallet in use. Use the command \'use wallet\' to select an active wallet.");
-                                } else {
-                                    System.out.println("Current wallet: "+currentWallet.getWalletFile().toAbsolutePath());
-                                    if(currentWallet.getAccounts()!=null) {
-                                        System.out.println("Accounts: ");
-                                        ArrayList<Account> activeAccounts = new ArrayList<Account>();
-                                        activeAccounts = currentWallet.getAccounts();
-                                        int i = 1;
-                                        for (Account account : activeAccounts) {
-                                            System.out.println(i+".");
-                                            System.out.println("   Alias: "+account.getAlias());
-                                            System.out.println("   Private Key: "+account.getPrivateKey());
-                                            System.out.println("   Public Key: "+account.getPublicKey());
-                                            i++;
-                                        }
-                                    } else {
-                                        System.out.println("Your wallet is empty.");
-                                    }
-                                            
-                                }
-                                break;
-                            case "create account":
-                                System.out.println("Create account.");
-                                String accountName = null;
-                            
-                                try {
-                                    if(args[0].equalsIgnoreCase("-alias") && args[1]!=null) {
-                                        accountName = args[1];
-                                    } else {
-                                        System.out.println("Please specify an account name.");
-                                        break;
-                                    }
-                                } catch(NullPointerException np) {
-                                    System.out.println("Please specify an account name.");
-                                    break;
-                                } catch(ArrayIndexOutOfBoundsException ai) {
-                                    System.out.println("Please specify an account name.");
-                                    break;
-                                }
-                                activeAccount = createAccount(accountName);
-                                
-                                System.out.println("Account created.");
-                                System.out.println("account {");
-                                System.out.println("   alias: \""+activeAccount.getAlias()+ "\",");
-                                System.out.println("   private key: \""+activeAccount.getPrivateKey()+ "\",");
-                                System.out.println("   public key: \""+activeAccount.getPublicKey()+"\"");
-                                System.out.println("}");
-                                System.out.println("Save your account to a wallet using the  \'save account\' command.");                                
-                                break;
-                            
-                            //*
-                             /* Saves an account to a wallet file. 
+                    } catch (NullPointerException np) {
+                        System.out.println("Please specify a wallet path.");
+                    }
+                    useWallet(path);
+                    break;
+                case "current wallet":
+                    args = null;
+                    if (currentWallet == null) {
+                        System.out.println("There is no current wallet in use. Use the command \'use wallet\' to select an active wallet.");
+                    } else {
+                        System.out.println("Current wallet: " + currentWallet.getWalletFile().toAbsolutePath());
+                        if (currentWallet.getAccounts() != null) {
+                            System.out.println("Accounts: ");
+                            ArrayList<Account> activeAccounts = new ArrayList<Account>();
+                            activeAccounts = currentWallet.getAccounts();
+                            int i = 1;
+                            for (Account account : activeAccounts) {
+                                System.out.println(i + ".");
+                                System.out.println("   Alias: " + account.getAlias());
+                                System.out.println("   Private Key: " + account.getPrivateKey());
+                                System.out.println("   Public Key: " + account.getPublicKey());
+                                i++;
+                            }
+                        } else {
+                            System.out.println("Your wallet is empty.");
+                        }
+
+                    }
+                    break;
+                case "create account":
+                    System.out.println("Create account.");
+                    String accountName = null;
+
+                    try {
+                        if (args[0].equalsIgnoreCase("-alias") && args[1] != null) {
+                            accountName = args[1];
+                        } else {
+                            System.out.println("Please specify an account name.");
+                            break;
+                        }
+                    } catch (NullPointerException np) {
+                        System.out.println("Please specify an account name.");
+                        break;
+                    } catch (ArrayIndexOutOfBoundsException ai) {
+                        System.out.println("Please specify an account name.");
+                        break;
+                    }
+                    activeAccount = createAccount(accountName);
+
+                    System.out.println("Account created.");
+                    System.out.println("account {");
+                    System.out.println("   alias: \"" + activeAccount.getAlias() + "\",");
+                    System.out.println("   private key: \"" + activeAccount.getPrivateKey() + "\",");
+                    System.out.println("   public key: \"" + activeAccount.getPublicKey() + "\"");
+                    System.out.println("}");
+                    System.out.println("Save your account to a wallet using the  \'save account\' command.");
+                    break;
+
+                    //*
+                    /* Saves an account to a wallet file.
                               * save account
                               *    Saves active account to the current wallet.
                               * save account -wallet <filepath>
                               *    Saves the active account to the specified wallet file.
-                              */ 
-                            case "save account":
-                                System.out.println("command: save account.");
-                                String walletAccount = null;
-                                Path walletFile = null;
-                                
-                                // Simplest case. Saves the active account to the current wallet.
-                                if(args==null && activeAccount!=null && currentWallet!=null) {
-                                    saveAccount(activeAccount, currentWallet.getWalletFile());
-                                    System.out.println("Account saved to wallet.");
-                                    break;
-                                } 
+                              */
+                case "save account":
+                    System.out.println("command: save account.");
+                    String walletAccount = null;
+                    Path walletFile = null;
 
-                                // Validates that an active account exists before saving it to a wallet file.
-                                if(args!=null && activeAccount == null) {
-                                    System.out.println("Please create an account first.");
-                                    break;
-                                }
-                            
-                                // Validates presence of a wallet file.
-                                if(args!=null && currentWallet.getWalletFile()==null) {
-                                    System.out.println("Please specify a wallet.");
-                                    break;
-                                }
-                                
-                                try {
-                                    if(args[0].equalsIgnoreCase("-wallet")) {
-                                        walletFile = Paths.get(args[1]).toAbsolutePath();
-                                    }
-                                    if(Files.notExists(walletFile)) {
-                                        System.out.println("Please specify a valid wallet path.");
-                                        break;
-                                    }
-                                    saveAccount(activeAccount, walletFile);
-                                } catch(NullPointerException np) {
-                                    System.out.println("Please specify a valid wallet path.");
-                                    break;
-                                }
-                               
-                                break;
-                            case "delete account":
-                                System.out.println("Delete account.");
-                                deleteAccount(args);
-                                break;
-                            case "check balance":
-                                //* Checks the balance of an account with a particular alias.
-                                /*  Usage: check balance -all : Checks balance for all accounts in the wallet
+                    // Simplest case. Saves the active account to the current wallet.
+                    if (args == null && activeAccount != null && currentWallet != null) {
+                        saveAccount(activeAccount, currentWallet.getWalletFile());
+                        System.out.println("Account saved to wallet.");
+                        break;
+                    }
+
+                    // Validates that an active account exists before saving it to a wallet file.
+                    if (args != null && activeAccount == null) {
+                        System.out.println("Please create an account first.");
+                        break;
+                    }
+
+                    // Validates presence of a wallet file.
+                    if (args != null && currentWallet.getWalletFile() == null) {
+                        System.out.println("Please specify a wallet.");
+                        break;
+                    }
+
+                    try {
+                        if (args[0].equalsIgnoreCase("-wallet")) {
+                            walletFile = Paths.get(args[1]).toAbsolutePath();
+                        }
+                        if (Files.notExists(walletFile)) {
+                            System.out.println("Please specify a valid wallet path.");
+                            break;
+                        }
+                        saveAccount(activeAccount, walletFile);
+                    } catch (NullPointerException np) {
+                        System.out.println("Please specify a valid wallet path.");
+                        break;
+                    }
+
+                    break;
+                case "delete account":
+                    System.out.println("Delete account.");
+                    deleteAccount(args);
+                    break;
+                case "check balance":
+                    //* Checks the balance of an account with a particular alias.
+                    /*  Usage: check balance -all : Checks balance for all accounts in the wallet
                                  *         check balance -account <alias> : Checks balance for a particular account.
                                  *         check balance -wallet <wallet> -all
                                  *         check balance -wallet <wallet> -account <alias>
@@ -565,206 +558,204 @@ public class Client {
                                  *  4. Calls the check balance function.
                                  *  5. Returns balance.
                                  */
-                                System.out.println("check balance.");
-                                String alias = null;
-                                Path walletFilepath = null;
-                                boolean all = false;
-                            
-                                try {
-                                    for(int i=0; i<args.length-1;i++) {
-                                        if(args[i].equalsIgnoreCase("-account")) {
-                                            alias = args[i+1];
-                                        } else if(args[i].equalsIgnoreCase("-wallet")) {
-                                            walletFilepath = Paths.get(args[i+1]).toAbsolutePath();
-                                        } else if(args[i].equalsIgnoreCase("-all")) {
-                                            all = true;
-                                    }
-                                    }
-                                } catch(NullPointerException np) {
-                                    System.out.println("Please specify a valid account.");
-                                    break;
+                    System.out.println("check balance.");
+                    String alias = null;
+                    Path walletFilepath = null;
+                    boolean all = false;
+
+                    try {
+                        for (int i = 0; i < args.length - 1; i++) {
+                            if (args[i].equalsIgnoreCase("-account")) {
+                                alias = args[i + 1];
+                            } else if (args[i].equalsIgnoreCase("-wallet")) {
+                                walletFilepath = Paths.get(args[i + 1]).toAbsolutePath();
+                            } else if (args[i].equalsIgnoreCase("-all")) {
+                                all = true;
+                            }
+                        }
+                    } catch (NullPointerException np) {
+                        System.out.println("Please specify a valid account.");
+                        break;
+                    }
+
+                    if (all == true && walletFilepath == null && alias == null) {
+                        //check balance -all
+                        ArrayList<Account> accounts = new ArrayList<Account>();
+                        checkBalance(currentWallet.getAccounts());
+                    } else if (alias != null && all == false && walletFilepath == null) {
+                        //check balance -account <alias>
+                        if (currentWallet != null) {
+                            ArrayList<Account> walletAccounts = new ArrayList<Account>();
+                            walletAccounts = currentWallet.getAccounts();
+                            for (Account account : walletAccounts) {
+                                if (account.getAlias().equals(alias)) {
+                                    checkBalance(account);
                                 }
-                            
-                                if(all==true && walletFilepath==null && alias == null) {
-                                    //check balance -all
-                                    ArrayList<Account> accounts = new ArrayList<Account>();
-                                    checkBalance(currentWallet.getAccounts());
-                                } else if (alias!=null && all==false && walletFilepath==null) {
-                                    //check balance -account <alias>
-                                if(currentWallet!=null) {
-                                        ArrayList <Account> walletAccounts = new ArrayList<Account>();
-                                        walletAccounts = currentWallet.getAccounts();
-                                        for (Account account : walletAccounts) {
-                                            if(account.getAlias().equals(alias)) {
-                                                checkBalance(account);            
-                                }    
-                                        }
-                                    }    
-                                } else if (walletFilepath!=null && all==true && alias==null) {
-                                    //check balance -wallet <wallet> -all
-                                    //ToDo: Verify that filepath exists.
-                                    Wallet wallet = new Wallet();
-                                    wallet.setWalletFile(walletFilepath);
-                                    ArrayList <Account> walletAccounts = new ArrayList<Account>();
-                                    walletAccounts = wallet.getAccounts();
-                                    checkBalance(walletAccounts);
-                                } else if (walletFilepath!=null && alias!=null && all==false) {
-                                    //check balance -wallet <wallet> -account <alias>
-                                    //ToDo: Verify that filepath exists.
-                                    Wallet wallet = new Wallet();
-                                    wallet.setWalletFile(walletFilepath);
-                                    ArrayList <Account> walletAccounts = new ArrayList<Account>();
-                                    walletAccounts = wallet.getAccounts();
-                                    for (Account account : walletAccounts) {
-                                        if(account.getAlias().equals(alias)) {
-                                            checkBalance(account);            
-                                        }
-                                    }
-                                }
-                                
-                                break;
-                            case "list transactions":
-                                System.out.println("List transactions.");
-                                break;
-                            case "export key":
-                                //Exports the public key to a .key file
-                                //Usage: export key
-                                System.out.println("export key");
-                                String account = null;
-                                byte[] unencodedKey = null;
-                                String encodedKey = null;
-                                String filename = null;
-                                
-                                if(args[0].equalsIgnoreCase("-account")) {
-                                    account = args[1];
-                                } 
-                                 
-                                Account acc = new Account();
-                                ArrayList<Account> accounts = new ArrayList<Account>();
-                                accounts = currentWallet.getAccounts();
-                                for(Account ac : accounts) {
-                                    if(ac.getAlias().equals(account)) {
-                                        acc = ac;
-                                    }
-                                }
-                                
-                                System.out.println("account: "+acc.getAlias());
-                                unencodedKey = acc.getPublicKey();
-                                System.out.println("unencoded key: "+unencodedKey);
-                                encodedKey = acc.encodeKey(unencodedKey);
-                                System.out.println("encoded key: "+encodedKey);
-                                filename = acc.getAlias();
-                                System.out.println("filename: "+filename);
-                                exportKey(filename,encodedKey);
-                                
-                                break;
-                            case "add buddy":
-                                String name = null;
-                                Path key = null;
-                                try {
-                                    for(int i=0; i<args.length-1;i++) {
-                                        if(args[i].equalsIgnoreCase("-name")) {
-                                            name = args[i+1];
-                                        } else if(args[i].equalsIgnoreCase("-key")) {
-                                            key = Paths.get(args[i+1]).toAbsolutePath();
-                                        }
-                                    }
-                                } catch(NullPointerException np) {
-                                    np.printStackTrace();
-                                }
-                                if(Files.notExists(key)) {
-                                    System.out.println("Key file doesn't exist.");
-                                    break;
-                                }
-                                if(name == null) {
-                                    System.out.println("Buddy name can't be empty.");
-                                    break;
-                                }
-                                addBuddy(name,key);
-                                System.out.println("Buddy added.");
-                                break;
-                            case "transfer funds":
-                                //Transfers funds to a buddy.
-                                System.out.println("Transfer funds.");
-                                byte source[] = null;
-                                String target = null;
-                                BigDecimal amount = null; 
-                            
-                                try {
-                                    for(int i=0; i<args.length-1;i++) {
-                                        if(args[i].equalsIgnoreCase("-source")) {
-                                            source = args[i+1].getBytes();
-                                        } else if(args[i].equalsIgnoreCase("-target")) {
-                                            target = args[i+1];
-                                        } else if(args[i].equalsIgnoreCase("-amount")) {
-                                            amount = new BigDecimal(args[i+1]);
-                                        }
-                                    }
-                                } catch(NullPointerException np) {
-                                    System.out.println("Please specify a wallet alias.");
-                                    break;
-                                } catch(NumberFormatException nf) {
-                                    System.out.println("Please enter a valid amount.");
-                                    break;        
-                                }
-                            
-                                transferFunds(source, target, amount);
-                                break;
-                            case "start miner":
-                                String minerAccount = null;
-                                byte[] publicKey = null;
-                                byte[] privateKey = null;
-                                int tcpPort = 0;
-                                int httpPort = 0;
-                                for(int i=0; i<args.length-1;i++) {
-                                    if(args[i].equalsIgnoreCase("-account")) {
-                                        minerAccount = args[i+1];
-                                        if(minerAccount == null) {
-                                            System.out.println("Please specify an account.");
-                                            break;
-                                        }
-                                    } else if(args[i].equalsIgnoreCase("-tcp")) {
-                                        tcpPort = Integer.parseInt(args[i+1]);
-                                        if(tcpPort <= 0 || tcpPort > 65535) {
-                                            tcpPort = 12345;
-                                            System.out.println("Invalid port number, running on default (12345)");
-                                        }
-                                    } else if(args[i].equalsIgnoreCase("-http")) {
-                                        httpPort = Integer.parseInt(args[i+1]);
-                                        if(httpPort <=0 || httpPort > 65535) {
-                                            httpPort = 8080;
-                                            System.out.println("Invalid port number, running on default (8080)");
-                                        }
-                                    }
-                                }    
-                                ArrayList<Account> minerAccounts = currentWallet.getAccounts();
-                                
-                                for(Account minAccount : minerAccounts) {
-                                    if(minAccount.getAlias().equals(minerAccount)) {
-                                        publicKey = minAccount.getPublicKey();
-                                        privateKey = minAccount.getPrivateKey();
-                                    }
-                                }
-                                System.out.println("public key: "+publicKey);
-                                System.out.println("private key: "+privateKey);
-                                System.out.println("http port: "+httpPort);
-                                System.out.println("tcp port: "+tcpPort);
-                                System.out.println("Starting miner for account "+minerAccount);
-                                startMiner(publicKey, privateKey, tcpPort, httpPort);
-                                break;
-                            case "stop miner":
-                                stopMiner();
-                                break;
-                            default:
-                                System.out.println("Not a valid command.");
-                                break;
+                            }
+                        }
+                    } else if (walletFilepath != null && all == true && alias == null) {
+                        //check balance -wallet <wallet> -all
+                        //ToDo: Verify that filepath exists.
+                        Wallet wallet = new Wallet();
+                        wallet.setWalletFile(walletFilepath);
+                        ArrayList<Account> walletAccounts = new ArrayList<Account>();
+                        walletAccounts = wallet.getAccounts();
+                        checkBalance(walletAccounts);
+                    } else if (walletFilepath != null && alias != null && all == false) {
+                        //check balance -wallet <wallet> -account <alias>
+                        //ToDo: Verify that filepath exists.
+                        Wallet wallet = new Wallet();
+                        wallet.setWalletFile(walletFilepath);
+                        ArrayList<Account> walletAccounts = new ArrayList<Account>();
+                        walletAccounts = wallet.getAccounts();
+                        for (Account account : walletAccounts) {
+                            if (account.getAlias().equals(alias)) {
+                                checkBalance(account);
+                            }
                         }
                     }
+
+                    break;
+                case "list transactions":
+                    System.out.println("List transactions.");
+                    break;
+                case "export key":
+                    //Exports the public key to a .key file
+                    //Usage: export key
+                    System.out.println("export key");
+                    String account = null;
+                    byte[] unencodedKey = null;
+                    String encodedKey = null;
+                    String filename = null;
+
+                    if (args[0].equalsIgnoreCase("-account")) {
+                        account = args[1];
+                    }
+
+                    Account acc = new Account();
+                    ArrayList<Account> accounts = new ArrayList<Account>();
+                    accounts = currentWallet.getAccounts();
+                    for (Account ac : accounts) {
+                        if (ac.getAlias().equals(account)) {
+                            acc = ac;
+                        }
+                    }
+
+                    System.out.println("account: " + acc.getAlias());
+                    unencodedKey = acc.getPublicKey();
+                    System.out.println("unencoded key: " + unencodedKey);
+                    encodedKey = acc.encodeKey(unencodedKey);
+                    System.out.println("encoded key: " + encodedKey);
+                    filename = acc.getAlias();
+                    System.out.println("filename: " + filename);
+                    exportKey(filename, encodedKey);
+
+                    break;
+                case "add buddy":
+                    String name = null;
+                    Path key = null;
+                    try {
+                        for (int i = 0; i < args.length - 1; i++) {
+                            if (args[i].equalsIgnoreCase("-name")) {
+                                name = args[i + 1];
+                            } else if (args[i].equalsIgnoreCase("-key")) {
+                                key = Paths.get(args[i + 1]).toAbsolutePath();
+                            }
+                        }
+                    } catch (NullPointerException np) {
+                        np.printStackTrace();
+                    }
+                    if (Files.notExists(key)) {
+                        System.out.println("Key file doesn't exist.");
+                        break;
+                    }
+                    if (name == null) {
+                        System.out.println("Buddy name can't be empty.");
+                        break;
+                    }
+                    addBuddy(name, key);
+                    System.out.println("Buddy added.");
+                    break;
+                case "transfer funds":
+                    //Transfers funds to a buddy.
+                    System.out.println("Transfer funds.");
+                    byte source[] = null;
+                    String target = null;
+                    BigDecimal amount = null;
+
+                    try {
+                        for (int i = 0; i < args.length - 1; i++) {
+                            if (args[i].equalsIgnoreCase("-source")) {
+                                source = args[i + 1].getBytes();
+                            } else if (args[i].equalsIgnoreCase("-target")) {
+                                target = args[i + 1];
+                            } else if (args[i].equalsIgnoreCase("-amount")) {
+                                amount = new BigDecimal(args[i + 1]);
+                            }
+                        }
+                    } catch (NullPointerException np) {
+                        System.out.println("Please specify a wallet alias.");
+                        break;
+                    } catch (NumberFormatException nf) {
+                        System.out.println("Please enter a valid amount.");
+                        break;
+                    }
+
+                    transferFunds(source, target, amount);
+                    break;
+                case "start miner":
+                    String minerAccount = null;
+                    byte[] publicKey = null;
+                    byte[] privateKey = null;
+                    int tcpPort = 0;
+                    int httpPort = 0;
+                    for (int i = 0; i < args.length - 1; i++) {
+                        if (args[i].equalsIgnoreCase("-account")) {
+                            minerAccount = args[i + 1];
+                            if (minerAccount == null) {
+                                System.out.println("Please specify an account.");
+                                break;
+                            }
+                        } else if (args[i].equalsIgnoreCase("-tcp")) {
+                            tcpPort = Integer.parseInt(args[i + 1]);
+                            if (tcpPort <= 0 || tcpPort > 65535) {
+                                tcpPort = 12345;
+                                System.out.println("Invalid port number, running on default (12345)");
+                            }
+                        } else if (args[i].equalsIgnoreCase("-http")) {
+                            httpPort = Integer.parseInt(args[i + 1]);
+                            if (httpPort <= 0 || httpPort > 65535) {
+                                httpPort = 8080;
+                                System.out.println("Invalid port number, running on default (8080)");
+                            }
+                        }
+                    }
+                    ArrayList<Account> minerAccounts = currentWallet.getAccounts();
+
+                    for (Account minAccount : minerAccounts) {
+                        if (minAccount.getAlias().equals(minerAccount)) {
+                            publicKey = minAccount.getPublicKey();
+                            privateKey = minAccount.getPrivateKey();
+                        }
+                    }
+                    System.out.println("public key: " + publicKey);
+                    System.out.println("private key: " + privateKey);
+                    System.out.println("http port: " + httpPort);
+                    System.out.println("tcp port: " + tcpPort);
+                    System.out.println("Starting miner for account " + minerAccount);
+                    startMiner(publicKey, privateKey, tcpPort, httpPort);
+                    break;
+                case "stop miner":
+                    stopMiner();
+                    break;
+                default:
+                    System.out.println("Not a valid command.");
+                    break;
                 }
-                    sc.close();
-                    
             }
-            }
+        }
+        sc.close();
+    }
         
     private static void printHelp() {
         System.out.println("List of commands: ");
