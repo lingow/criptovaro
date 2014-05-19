@@ -22,7 +22,6 @@ public class BranchRequest extends Request<LinkedList<BlockNode>>{
 
     @Override
     protected boolean deliver(Peer peer) {
-        // TODO Implement this method
-        return true;
+        throw new UnsupportedOperationException();
     }
 }

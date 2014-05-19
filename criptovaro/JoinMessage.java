@@ -11,6 +11,6 @@ public class JoinMessage extends Message {
     protected boolean deliver(Peer peer) 
     {
         // TODO:Not sure yet if we need to do something here...
-        return true;
+        throw new UnsupportedOperationException();
     }
 }
