@@ -47,8 +47,9 @@ public class Client {
     Account activeAccount = null;
     Path currentPath = null;
     
-    private void init() throws IOException {
-        
+    private void init() throws IOException 
+    {
+        PeerManager.INSTANCE.init();    
     }
     
     //Status: Completed
@@ -80,7 +81,7 @@ public class Client {
         target = getBuddiesKey(buddy);
         System.out.println("Transferring "+amount+" to buddy "+target+".");
         Transaction transaction = new Transaction(source, target, amount);
-        //(new TransactionMessage(transaction)).bcast();
+        (new TransactionMessage(transaction)).bcast();
         System.out.println("Funds transferred.");
         return transaction;
     }

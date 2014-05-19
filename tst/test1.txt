@@ -1,6 +1,7 @@
 use wallet MyWallet.wallet
 create account -alias Master
 save account
+start miner -account Master -tcp 12345 -http 8080
 create account -alias Secondary
 save account
 create account -alias Savings
@@ -11,8 +12,6 @@ check balance -account Secondary
 export key -account Secondary
 check balance -account Savings
 export key -account Savings
-start miner -account Master -tcp 12345 -http 8080
-stop miner Master
 check balance -account Master
 check balance -account Secondary
 check balance -account Savings

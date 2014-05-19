@@ -10,6 +10,7 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 
 import java.util.Collection;
+import java.util.logging.Level;
 
 /**
  * This abstract class provides methods to send, broadcast and receive Messages.
@@ -42,7 +43,9 @@ public abstract class Message implements Serializable{
      * @param p The peer from which this message came from
      * @param s The open socket by which this message came from
      */
-    public void receive(Peer p, @SuppressWarnings("unused") Socket s){
+    public void receive(Peer p, @SuppressWarnings("unused") Socket s)
+    {
+        Miner.LOG.log(Level.INFO, "Message received. Attempting deliver.");
         if ( ! this.deliver(p) )
             PeerManager.INSTANCE.deletePeer(p);
     }
@@ -52,8 +55,10 @@ public abstract class Message implements Serializable{
      * @param peers A collection of peers to which this message should be sent.
      */
     public void bcast(){
-        for(Peer p: PeerManager.INSTANCE.getPeers()){
-                this.send(p);
+        for(Peer p: PeerManager.INSTANCE.getPeers())
+        {
+            Miner.LOG.log(Level.INFO, "Sending message to peer " + p.getIPAddressString());
+            this.send(p);
         }
     }
 

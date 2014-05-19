@@ -255,12 +255,13 @@ public class Miner implements Runnable{
                 incomingTransactions = this.pool.getAllTransactions();
                         
                 if(incomingTransactions != null)
-                        {
+                {
+                    LOG.log(Level.INFO, "Miner found new transaction. Adding to the current Block.");
                     CurrentBlock.addTransactions(incomingTransactions, this.tm, unspentTransCache);
                                 
                     //If new transaction was added, reset the proof iterator to a new random.
                     currentProof = sr.nextLong();
-                        }
+                }
                         
                 //Done with new transactions, now try to calculate the proof for this block.
                 if(CurrentBlock.getTransactions().size() < 1 )
@@ -352,12 +353,10 @@ public class Miner implements Runnable{
         Update();
         
         //Start work main loop.
-        boolean debugCon = true;
-        while(debugCon)
+        while(true)
         {
-            debugCon = false;
             //Will loop for new transactions until interruptWork is set.
-            //Work(); 
+            Work(); 
             
             //Listener received a stat message with a longer length. Update block chain.
             Update();
@@ -403,50 +402,7 @@ public class Miner implements Runnable{
     }
 
 public static void main(String[] args)
-    {
-        //Account-transaction test case. Should be moved into a unit test.
-        //Make a transaction from account ORIGIN to account DESTINATION of 100 CV, using 2 inputs of 50 and 80 CV respectively.
-        //Expected result: Successful transaction with an output of the reminder 30 CV to account 1
-        //Test inputs: 2 ficticious transaction from PAST account to ORIGIN account.
-        Account acc1 = new Account();
-        acc1.setAlias("ORIGIN_ACCOUNT");
-        acc1.generateKeys();
-        
-        Account acc2 = new Account();
-        acc2.setAlias("DESTINATION_ACCOUNT");
-        acc2.generateKeys();
-        
-        Account acc3 = new Account();
-        acc3.setAlias("PAST_ACCOUNT");
-        acc3.generateKeys();
-        
-        Transaction t1 = new Transaction(acc1.getPublicKey(), acc2.getPublicKey(), BigDecimal.valueOf(100));
-        Transaction t2 = new Transaction(acc3.getPublicKey(), acc1.getPublicKey(), BigDecimal.valueOf(50));
-        Transaction t3 = new Transaction(acc3.getPublicKey(), acc1.getPublicKey(), BigDecimal.valueOf(80));
-        
-        //t1.setOriginTransaction(new byte[]{0,1}); //BUG:validate
-        //t1.setSpentBy(new byte[]{0,1}); //BUG: validate
-        if(t1.Sign(acc1)) //Change this for an assert on unit test
-            System.out.println("Transaction successfully signed!!");
-        if(t1.verify()) 
-            System.out.println("Transaction successfully verified!");
-        
-        //t2.setOriginTransaction(new byte[]{0,1}); //BUG:validate
-        //t2.setSpentBy(new byte[]{0,1}); //BUG: validate
-        if(t2.Sign(acc3)) //Change this for an assert on unit test
-            System.out.println("Transaction successfully signed!!");
-        if(t2.verify()) 
-            System.out.println("Transaction successfully verified!");
-        
-        //t3.setOriginTransaction(new byte[]{0,1}); //BUG:validate
-        //t3.setSpentBy(new byte[]{0,1}); //BUG: validate
-        if(t3.Sign(acc3)) //Change this for an assert on unit test
-            System.out.println("Transaction successfully signed!!");
-        if(t3.verify()) 
-            System.out.println("Transaction successfully verified!");
-        //End of test case
-        
-        
+    {    
         Miner theMiner = Miner.INSTANCE;
         String pubkey = null;
         String privkey = null;
@@ -480,17 +436,6 @@ public static void main(String[] args)
         {
             theMiner.start(new Account(pubkey, privkey), tcp_port, web_port);
             
-            //BlockManaer test case
-//            BlockManager bm = new BlockManager();
-//            Block b = new Block();
-//            if(!b.addTransaction(t1))
-//                LOG.log(Level.INFO, "Failed to add transaction!");
-//            if(!b.addTransaction(t2))
-//                LOG.log(Level.INFO, "Failed to add transaction!");
-//            if(!b.addTransaction(t3))
-//                LOG.log(Level.INFO, "Failed to add transaction!");
-//            bm.insertBlock(b);
-            //End BlockManager test case
         }
         catch(Exception e)
         {
