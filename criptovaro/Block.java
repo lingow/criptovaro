@@ -37,7 +37,7 @@ public class Block implements Serializable {
 
     public Block(ResultSet rs) throws IOException, SQLException {
         
-        
+        throw new UnsupportedOperationException();
         
     }
 
@@ -176,8 +176,7 @@ public class Block implements Serializable {
      * @return true if it matches. False if either the proof is incorrect or not set
      */
     public boolean verify() {
-        //TODO: Implement this Method
-        return false;
+        throw new UnsupportedOperationException();
     }
 
     public boolean containsTransaction(Transaction tran) 
@@ -232,8 +231,7 @@ public class Block implements Serializable {
 
     public Collection<Transaction> getRegularTrans() 
     {
-        //TODO: Implement Method
-        return new ArrayList<Transaction>();
+        throw new UnsupportedOperationException();
     }
     
     void setPrizeTransaction(Transaction prize) 

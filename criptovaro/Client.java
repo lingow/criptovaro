@@ -286,11 +286,14 @@ public class Client {
         return true;
     }
  
-    public void printTransactionStatus(String args[]) {
+    public void printTransactionStatus(String args[]) 
+    {
+        throw new UnsupportedOperationException();
     }
  
-    public Transaction[] listTransactions(String args[]) {
-        return null;
+    public Transaction[] listTransactions(String args[]) 
+    {
+        throw new UnsupportedOperationException();
     }
 
     private void executePrompt(InputStream is) {

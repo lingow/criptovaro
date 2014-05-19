@@ -24,7 +24,6 @@ public class BlockRequest extends Request<Block>{
 
     @Override
     protected boolean deliver(Peer peer) {
-        // TODO Implement this method
-        return true;
+        throw new UnsupportedOperationException();
     }
 }
