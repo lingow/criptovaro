@@ -64,14 +64,16 @@ public class TransactionManager{
      *             output transaction.
      * On failure: returns null, logs error.
      */
-    public ArrayList<Transaction> getAccountFunds(byte[] account)
+
+    public ArrayList<Transaction> getAccountFunds(byte[] publicKey)
     {
+
         ArrayList<Transaction> retList = new ArrayList<Transaction>();
         StringBuilder sb = new StringBuilder();
         Connection c = Ledger.INSTANCE.connect();
         sb.append("SELECT * FROM TRANSACTIONS WHERE TOKEY = '");
         BASE64Encoder encoder = new BASE64Encoder();
-        sb.append(encoder.encode(account));
+        sb.append(encoder.encode(publicKey));
         sb.append("'  AND SPENTBY IS NULL ;");
         ResultSet rs = Ledger.INSTANCE.select(c,sb.toString());
         if (rs != null ){
