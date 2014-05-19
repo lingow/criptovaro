@@ -6,9 +6,11 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 
 import java.io.PrintWriter;
@@ -29,7 +31,9 @@ import java.util.Scanner;
 import java.util.concurrent.Semaphore;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.Semaphore;
@@ -355,12 +359,8 @@ public class Client {
         return null;
     }
     
-    private void executePrompt() {
-        final Semaphore semaphore = new Semaphore(0);
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try (Scanner scanner = new Scanner(System.in)) {
+    private void executePrompt(InputStream is) {
+        try (Scanner scanner = new Scanner(is)) {
                     boolean running = true;
                     Scanner sc = null;
                     File file = new File("test.txt");
@@ -404,7 +404,6 @@ public class Client {
                        
                         switch (command) {
                             case "quit":
-                                semaphore.release();
                                 running = false;
                                 break;
                             case "help":
@@ -766,16 +765,7 @@ public class Client {
                     
             }
             }
-        }).start();
-        try {
-            semaphore.acquire();
-        } catch (InterruptedException ie) {
-            System.out.println("Error waiting for process.");
-            ie.printStackTrace();
-        }
         
-    }
-   
     private static void printHelp() {
         System.out.println("List of commands: ");
         System.out.println("create wallet [-path <Wallet path>] [-name <Wallet filename>]");    
@@ -832,7 +822,28 @@ public class Client {
         System.out.println("Criptovaro 0.1");
         final Client client = new Client();
         client.init();
-        client.executePrompt();
+        //Parse Command line Arguments
+        LinkedList<String> arglist = new LinkedList(Arrays.asList(args));
+        InputStream is = System.in;
+        while (!arglist.isEmpty()){
+            String s = arglist.pop();
+            switch(s){
+            case "-f":
+                if(arglist.isEmpty()){
+                    System.out.println("No file provided");
+                } else {
+                    String f = arglist.pop();
+                    if (!(new File(f)).exists()){
+                        System.out.println("Specified input file does not exist");
+                    }
+                    is = new FileInputStream(f);
+                }
+                break;
+            default:
+                break;
+            }
+        }
+        client.executePrompt(is);
         client.close();
         System.exit(0);
     }
