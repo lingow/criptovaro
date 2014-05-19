@@ -31,9 +31,11 @@ import java.util.concurrent.Semaphore;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.Semaphore;
  
@@ -64,8 +66,8 @@ public class Client {
     }
     
     //Status: Completed
-    public void saveAccount(Account account, Path filepath) {
-        account.saveToWallet(account, filepath);
+    public void saveAccount(Account account) {
+        currentWallet.saveToWallet(account);
     }
     
     private void deleteAccount(String args[]) {
@@ -83,7 +85,7 @@ public class Client {
         return transaction;
     }
     
-    public BigDecimal checkBalance(ArrayList<Account> accounts) {
+    public BigDecimal checkBalance(Collection<Account> accounts) {
         BigDecimal balance = new BigDecimal(0);
         for(Account account : accounts) {
             checkBalance(account);
@@ -222,14 +224,14 @@ public class Client {
     }
    
     //Status: Completed
-    private boolean startMiner(byte[] publicKey, byte[] privateKey, int tcpPort, int httpPort) {
+    private boolean startMiner(Account acc, int tcpPort, int httpPort) {
         int minerPid = 0;
         System.out.println("Starting Criptovaro miner...");
         Runtime rt = Runtime.getRuntime();
  
         BASE64Encoder e = new BASE64Encoder();
-        String encodedPublicKey = e.encode(publicKey);
-        String encodedPrivateKey = e.encode(privateKey);
+        String encodedPublicKey = e.encode(acc.getPublicKey());
+        String encodedPrivateKey = e.encode(acc.getPrivateKey());
  
         Process p = null;
         String command[] = {
@@ -255,10 +257,10 @@ public class Client {
         } finally {
             p.destroy();
         }
-        
+        acc.setMinerPort(tcpPort);
         minerPid = obtainMinerPid();
         if(minerPid!=0) {
-            currentWallet.setMinerPid(minerPid);
+            currentWallet.setMinerPid(acc,minerPid);
         }
         System.out.println("Miner started. Use command stop miner to stop the Criptovaro miner.");
         return true;
@@ -355,10 +357,8 @@ public class Client {
                         System.out.println("Current wallet: " + currentWallet.getWalletFile().toAbsolutePath());
                         if (currentWallet.getAccounts() != null) {
                             System.out.println("Accounts: ");
-                            ArrayList<Account> activeAccounts = new ArrayList<Account>();
-                            activeAccounts = currentWallet.getAccounts();
                             int i = 1;
-                            for (Account account : activeAccounts) {
+                            for (Account account : currentWallet.getAccounts().values()) {
                                 System.out.println(i + ".");
                                 System.out.println("   Alias: " + account.getAlias());
                                 System.out.println("   Private Key: " + account.getPrivateKey());
@@ -414,7 +414,7 @@ public class Client {
 
                     // Simplest case. Saves the active account to the current wallet.
                     if (args == null && activeAccount != null && currentWallet != null) {
-                        saveAccount(activeAccount, currentWallet.getWalletFile());
+                        saveAccount(activeAccount);
                         System.out.println("Account saved to wallet.");
                         break;
                     }
@@ -439,7 +439,7 @@ public class Client {
                             System.out.println("Please specify a valid wallet path.");
                             break;
                         }
-                        saveAccount(activeAccount, walletFile);
+                        saveAccount(activeAccount);
                     } catch (NullPointerException np) {
                         System.out.println("Please specify a valid wallet path.");
                         break;
@@ -485,13 +485,11 @@ public class Client {
                     if (all == true && walletFilepath == null && alias == null) {
                         //check balance -all
                         ArrayList<Account> accounts = new ArrayList<Account>();
-                        checkBalance(currentWallet.getAccounts());
+                        checkBalance(currentWallet.getAccounts().values());
                     } else if (alias != null && all == false && walletFilepath == null) {
                         //check balance -account <alias>
                         if (currentWallet != null) {
-                            ArrayList<Account> walletAccounts = new ArrayList<Account>();
-                            walletAccounts = currentWallet.getAccounts();
-                            for (Account account : walletAccounts) {
+                            for (Account account : currentWallet.getAccounts().values()) {
                                 if (account.getAlias().equals(alias)) {
                                     checkBalance(account);
                                 }
@@ -501,12 +499,12 @@ public class Client {
                         //check balance -wallet <wallet> -all
                         //ToDo: Verify that filepath exists.
                         Wallet wallet = new Wallet(walletFilepath.toString());
-                        checkBalance(wallet.getAccounts());
+                        checkBalance(wallet.getAccounts().values());
                     } else if (walletFilepath != null && alias != null && all == false) {
                         //check balance -wallet <wallet> -account <alias>
                         //ToDo: Verify that filepath exists.
                         Wallet wallet = new Wallet(walletFilepath.toString());
-                        for (Account acc : wallet.getAccounts()) {
+                        for (Account acc : wallet.getAccounts().values()) {
                             if (acc.getAlias().equals(alias)) {
                                 checkBalance(acc);
                             }
@@ -531,9 +529,7 @@ public class Client {
                     }
 
                     Account acc = new Account();
-                    ArrayList<Account> accounts = new ArrayList<Account>();
-                    accounts = currentWallet.getAccounts();
-                    for (Account ac : accounts) {
+                    for (Account ac : currentWallet.getAccounts().values()) {
                         if (ac.getAlias().equals(account)) {
                             acc = ac;
                         }
@@ -602,15 +598,15 @@ public class Client {
                     transferFunds(source, target, amount);
                     break;
                 case "start miner":
-                    String minerAccount = null;
+                    String minerAccountAlias = null;
                     byte[] publicKey = null;
                     byte[] privateKey = null;
                     int tcpPort = 0;
                     int httpPort = 0;
                     for (int i = 0; i < args.length - 1; i++) {
                         if (args[i].equalsIgnoreCase("-account")) {
-                            minerAccount = args[i + 1];
-                            if (minerAccount == null) {
+                            minerAccountAlias = args[i + 1];
+                            if (minerAccountAlias == null) {
                                 System.out.println("Please specify an account.");
                                 break;
                             }
@@ -628,20 +624,18 @@ public class Client {
                             }
                         }
                     }
-                    ArrayList<Account> minerAccounts = currentWallet.getAccounts();
-
-                    for (Account minAccount : minerAccounts) {
-                        if (minAccount.getAlias().equals(minerAccount)) {
-                            publicKey = minAccount.getPublicKey();
-                            privateKey = minAccount.getPrivateKey();
-                        }
+                    Account minerAccount = currentWallet.getAccount(minerAccountAlias);
+                    
+                    if (minerAccount == null){
+                        System.out.println("Non existant account.");
+                        break;
                     }
                     System.out.println("public key: " + publicKey);
                     System.out.println("private key: " + privateKey);
                     System.out.println("http port: " + httpPort);
                     System.out.println("tcp port: " + tcpPort);
-                    System.out.println("Starting miner for account " + minerAccount);
-                    startMiner(publicKey, privateKey, tcpPort, httpPort);
+                    System.out.println("Starting miner for account " + minerAccountAlias);
+                    startMiner(minerAccount, tcpPort, httpPort);
                     break;
                 case "stop miner":
                     if (args != null){

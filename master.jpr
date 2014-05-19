@@ -85,7 +85,7 @@
             <value n="name" v="Client test1"/>
             <value n="programArguments" v="-f criptovaro/tst/test1.txt"/>
             <url n="runDirectoryURL" path="../"/>
-            <url n="targetURL" path="classes/criptovaro/Client.class"/>
+            <value n="targetURL"/>
          </hash>
          <hash n="Default">
             <value n="custom" v="false"/>

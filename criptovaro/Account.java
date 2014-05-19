@@ -11,9 +11,12 @@ import java.security.*;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+
+import java.sql.Types;
 
 import sun.misc.BASE64Encoder;
 import sun.misc.BASE64Decoder;
@@ -24,6 +27,8 @@ public class Account
     private byte[] privateKey;
     private byte[] publicKey;
     private KeyPairGenerator kpg = null;
+    private int minerPID = 0;
+    private int minerPort = 0;
     
     public void generateKeys() 
     {
@@ -125,82 +130,20 @@ public class Account
         }
         return decodedKey;
     }
-    
-    public void saveToWallet(Account account, Path filepath) {
-        Statement stmt = null;
-        Connection connection = null;
-        String alias = account.getAlias();
-        byte[] publicKey = account.getPublicKey();
-        byte[] privateKey = account.getPrivateKey();
-        String encodedPublicKey = null;
-        String encodedPrivateKey = null;
-        filepath = filepath.toAbsolutePath();
-        
-        // Validates account and wallet.
-        if (account == null || filepath == null) {
-            System.out.println("Please create a wallet and an account.");
-            return;
-        }
-        
-        // Validates keys and encodes them.
-        if(publicKey == null || privateKey == null) {
-            return;
-        } else {
-            encodedPublicKey = account.encodeKey(publicKey);
-            encodedPrivateKey = account.encodeKey(privateKey);
-        }
-        
-        // Validates existance of wallet file.
-        if(Files.notExists(filepath)) {
-            System.out.println("Wallet file doesn't exist.");
-            return;
-        }
-        
-        String sql = String.format(
-        "INSERT OR REPLACE INTO ACCOUNTS " +
-        "(PRIVATEKEY, PUBLICKEY, ALIAS) " + 
-        "VALUES (\'%s\', \'%s\', \'%s\');",
-        encodedPrivateKey,encodedPublicKey,alias);
 
-        //Connection to database.
-        try {
-            connection = connect(filepath);
-            System.out.println("Connected to database: "+filepath);
-            stmt = connection.createStatement();
-            stmt.executeUpdate(sql);
-            stmt.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            System.out.println(e.getMessage());
-        } catch (Exception e) {
-            System.out.println("Error connecting to database: "+e.getMessage());
-            e.printStackTrace();
-        } finally {
-            disconnect(connection);
-            System.out.println("Disconnected from database.");    
-        }
-    }
-    
-    private Connection connect(Path filepath){
-        Connection connection = null;
-        try {
-            Class.forName("org.sqlite.JDBC");
-            connection = DriverManager.getConnection("jdbc:sqlite:"+filepath);
-        } catch(ClassNotFoundException ce) {
-            ce.printStackTrace();    
-        } catch(SQLException se) {
-            se.printStackTrace();
-        }
-        return connection;
+    public int getMinerPid() {
+        return this.minerPID;
     }
 
-    private void disconnect(Connection c) {
-        try {
-            c.close();
-        } catch(SQLException se) {
-            se.printStackTrace();
-        }
+    public void setMinerPid(int pid) {
+        this.minerPID = pid;
+    }
+
+    public int getMinerPort() {
+        return this.minerPort;
     }
     
-    
+    public void setMinerPort(int port) {
+        this.minerPort = port;
+    }
 }
