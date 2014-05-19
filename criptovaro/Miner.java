@@ -167,11 +167,12 @@ public class Miner {
                     b.setBlockChainPosition(peerBlock.getBlockChainPosition());
                     b.setPreviousBlock(peerBlock.getPreviousBlockHash());
                     b.setPrizeTransaction(createPrizeTransaction(peerBlock.getSolverPublicKey()));
-                    if ( !b.verify()){
+                    if ( !b.verify())
+                    {
                         //The proof is wrong
                         failed=true;
                         break;
-    }
+                    }
                     if (b.compare(peerBlock)){
                         peerBlocks.put(bn, peerBlock);
                     } else {

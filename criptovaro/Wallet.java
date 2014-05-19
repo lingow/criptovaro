@@ -115,8 +115,10 @@ public class Wallet {
         }
     }
 
-    public void deleteAccount(Account acc) {
+    public void deleteAccount(Account acc) 
+    {
         //if path exists and alias exists and account exists, remove row from table wallet
+        throw new UnsupportedOperationException();
     }
 
   

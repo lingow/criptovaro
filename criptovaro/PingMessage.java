@@ -5,8 +5,8 @@ public class PingMessage extends Message {
     private static final long serialVersionUID = 4016600693881729241L;
 
     @Override
-    protected boolean deliver(Peer peer) {
-        // TODO Implement this method
-        return false;
+    protected boolean deliver(Peer peer) 
+    {
+        throw new UnsupportedOperationException();
     }
 }
