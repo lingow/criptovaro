@@ -27,6 +27,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Time;
 
+import java.sql.Timestamp;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -233,8 +235,8 @@ public class Transaction implements Serializable {
         return timestamp;
     }
 
-    public void setTimestamp(Date timestamp) {
-        this.timestamp = timestamp;
+    public void setTimestamp() {
+        this.timestamp = new Date();
     }
 
     public byte[] getSpentBy() {

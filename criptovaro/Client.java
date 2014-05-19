@@ -80,11 +80,13 @@ public class Client {
         //wallet.deleteAccount();
     }
     
-    public Transaction transferFunds(byte source[], String buddy, BigDecimal amount) {
+    public Transaction transferFunds(Account acc, String buddy, BigDecimal amount) {
         byte[] target = null;
         target = getBuddiesKey(buddy);
         System.out.println("Transferring "+amount+" to buddy "+target+".");
-        Transaction transaction = new Transaction(source, target, amount);
+        Transaction transaction = new Transaction(acc.getPublicKey(), target, amount);
+        transaction.setTimestamp();
+        transaction.Sign(acc);
         (new TransactionMessage(transaction)).bcast();
         System.out.println("Funds transferred.");
         return transaction;
@@ -109,107 +111,25 @@ public class Client {
         }
     }
     
-    public void addBuddy(String buddy, Path key) {
-        //Append to files buddies.txt the pair <buddy,key>
-        String encodedKey = null;
-        Path buddies = Paths.get("buddies.txt");
-        //Read key
-        if(Files.notExists(buddies)) {
-            try {
-                File file = new File("buddies.txt");
-                BufferedWriter output = new BufferedWriter(new FileWriter(file));
-                output.close();
-            } catch ( IOException e ) {
-                e.printStackTrace();
-            }
-        
-        } else if(Files.notExists(key.toAbsolutePath())){
-            System.out.println("Key file doesn't exist.");
-            return;
-        } else {
-            File file = new File(key.toAbsolutePath().toString());
-            try {
-                FileReader reader = new FileReader(file);
-                char[] chars = new char[(int) file.length()];
-                reader.read(chars);
-                encodedKey = new String(chars);
-                reader.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-               
-        }
-        //Add key to buddies.txt
+    public void addBuddy(String name, Path key) {
         try {
-            File file = new File("buddies.txt");
-            FileWriter fw = new FileWriter(file.getAbsoluteFile());
-            BufferedWriter bw = new BufferedWriter(fw);
-            bw.write(buddy+","+encodedKey);
-            bw.close();
-            System.out.println("Buddy added to contact.");
+            currentWallet.storeBuddy( new Buddy(name, new String(Files.readAllBytes(key))));
         } catch (IOException e) {
-            System.out.println("Could not add buddy.");
+            System.out.println("Failed to add buddy");
+            e.printStackTrace();
         }
     }
 
     public byte[] getBuddiesKey(String buddy) {
-        File file = null;
-        //FileReader fr = null;
-        //BufferedReader br = null;
-        byte[] decodedKey = null;
-        String key = null;
-
+        Buddy b = currentWallet.loadBuddy(buddy);
+        BASE64Decoder dec = new BASE64Decoder();
         try {
-            file = new File("buddies.txt");
-            //fr = new FileReader(file);
-            //br = new BufferedReader(fr);
-            //String line = null;
-
-            String[] buddyInfo = null;
-            System.out.println("buddy: "+buddy);
-            try(BufferedReader br = new BufferedReader(new FileReader(file))) {
-                for(String line; (line = br.readLine()) != null; ) {
-                    System.out.println(line);
-                    buddyInfo = line.split(",");
-                    if(buddy.equals(buddyInfo[0])) {
-                        System.out.println("buddyinfo[0]: "+buddyInfo[0]);
-                        System.out.println("buddyinfo[1]: "+buddyInfo[1]);
-                        key = buddyInfo[1];
-                    }
-                    // process the line.
-                }
-                // line is not visible here.
-            }
-            
-            //while ((line = br.readLine()) != null) {
-            ///    System.out.println(line);
-            //    buddyInfo = line.split(",");
-            //    if(buddy.equals(buddyInfo[0])) {
-            //        key = buddyInfo[1];
-            //    }
-            //}
-        } catch (Exception e) {
-                e.printStackTrace();
-        } //finally {
-          //  try {
-          //       if (null != fr) {
-          //          fr.close();
-          //      }
-            //} catch (Exception e2) {
-            //    e2.printStackTrace();
-            //}
-        //}
-        System.out.println("buddie's key: "+key);
-        
-        BASE64Decoder d = new BASE64Decoder();
-        
-        try {
-            decodedKey = d.decodeBuffer(key);
+            return dec.decodeBuffer(b.key);
         } catch (IOException e) {
-            System.out.println("Could not decode encoded key.");
+            System.out.println("Failed to decode buddy");
+            e.printStackTrace();
         }
-        
-        return decodedKey;
+        return null;
     }
     
     public BigDecimal checkBalance(Account account) {
@@ -521,12 +441,7 @@ public class Client {
                         account = args[1];
                     }
 
-                    Account acc = new Account();
-                    for (Account ac : currentWallet.getAccounts().values()) {
-                        if (ac.getAlias().equals(account)) {
-                            acc = ac;
-                        }
-                    }
+                    Account acc = currentWallet.getAccounts().get(account);
 
                     System.out.println("account: " + acc.getAlias());
                     unencodedKey = acc.getPublicKey();
@@ -588,7 +503,7 @@ public class Client {
                         break;
                     }
 
-                    transferFunds(source, target, amount);
+                    transferFunds(currentWallet.getAccount(new String(source)), target, amount);
                     break;
                 case "start miner":
                     String minerAccountAlias = null;

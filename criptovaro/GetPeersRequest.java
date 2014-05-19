@@ -21,6 +21,6 @@ public class GetPeersRequest extends Request<ArrayList<Peer>> {
 
     @Override
     protected boolean deliver(Peer peer) {
-        throw new UnsupportedOperationException();
+        return true;
     }
 }

@@ -493,6 +493,7 @@ public static void main(String[] args)
 
     public void incomingTransaction(Transaction t) 
     {
+        Miner.LOG.log(Level.INFO,"Adding a transaction to pool");
         pool.addTransaction(t);
 }
     

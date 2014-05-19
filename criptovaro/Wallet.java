@@ -53,8 +53,12 @@ public class Wallet {
                             ", CONSTRAINT ACCOUNTS_UK2 UNIQUE ( MINERPORT ) " +
                             ", CONSTRAINT ACCOUNTS_UK3 UNIQUE ( PRIVATEKEY, PUBLICKEY ) " +
                             ");",
-                            "CREATE INDEX IF NOT EXISTS ACCOUNTS_INDEX1 ON ACCOUNTS ( ALIAS);"
-                            };
+                            "CREATE INDEX IF NOT EXISTS ACCOUNTS_INDEX1 ON ACCOUNTS ( ALIAS );",
+                            "CREATE TABLE IF NOT EXISTS BUDDIES " +
+                            "(NAME VARCHAR(128) NOT NULL , " +
+                            "KEY VARCHAR(1024) NOT NULL , " +
+                            "CONSTRAINT NAME_PK PRIMARY KEY ( NAME ) );",
+                            "CREATE INDEX IF NOT EXISTS BUDDIES_INDEX1 ON BUDDIES ( NAME );"};
 
         Connection connection = null;
         try {
@@ -297,7 +301,7 @@ public class Wallet {
         Buddy b = null;
         try {
             PreparedStatement ps = c.prepareStatement("SELECT KEY FROM BUDDIES WHERE NAME = ?");
-            ps.setString(1, b.name);
+            ps.setString(1, name);
             ResultSet rs = ps.executeQuery();
             while(rs.next()){
                 b = new Buddy(name,rs.getString("KEY"));

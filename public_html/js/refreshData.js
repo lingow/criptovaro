@@ -1,7 +1,11 @@
+function utf8_to_b64( str ) {
+  return window.btoa(unescape(encodeURIComponent( str )));
+}
+
 function encode(data)
 {
     var str = String.fromCharCode.apply(null,data);
-    return btoa(str).replace(/.{76}(?=.)/g,'$&\n');
+    return utf8_to_b64(str).replace(/.{76}(?=.)/g,'$&\n');
 }
 
 function refreshData(source,dest,interval){
