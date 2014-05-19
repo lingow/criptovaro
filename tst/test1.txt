@@ -12,7 +12,7 @@ export key -account Secondary
 check balance -account Savings
 export key -account Savings
 start miner -account Master -tcp 12345 -http 8080
-stop miner
+stop miner Master
 check balance -account Master
 check balance -account Secondary
 check balance -account Savings

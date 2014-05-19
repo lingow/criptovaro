@@ -20,17 +20,21 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
+
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import javax.xml.transform.Result;
 
 public class Wallet {
-    private int pid;
     private File file;
-    ArrayList<Account> accounts;
+    Map<String,Account> accounts;
     
     public Wallet(String filepath) {
         file = new File(filepath).getAbsoluteFile();
@@ -54,7 +58,7 @@ public class Wallet {
 
         Connection connection = null;
         try {
-            connection = connect(file.toPath().toAbsolutePath());
+            connection = connect();
             for (String sql : queries){
                 try {
                     stmt = connection.createStatement();
@@ -81,15 +85,23 @@ public class Wallet {
         return file.toPath().toAbsolutePath();
     }
     
-    public void setMinerPid(int pid) {
-        this.pid = pid;
+    public void setMinerPid(Account acc, int pid) {
+        acc.setMinerPid(pid);
+        saveToWallet(acc);
     }
     
     public int getMinerPid(String accountAlias) {
-        return pid;
+        try {
+            return accounts.get(accountAlias).getMinerPid();
+        } catch (NullPointerException e) {
+            System.out.println("No such account");
+            e.printStackTrace();
+        }
+        return -1;
     }
     
-    private Connection connect(Path filepath){
+    private Connection connect(){
+        Path filepath = file.toPath().toAbsolutePath();
         Connection connection = null;
         String dbfile = filepath.toAbsolutePath().toString();
         try {
@@ -147,7 +159,7 @@ public class Wallet {
         
     }
 
-    public ArrayList<Account> getAccounts() {
+    public Map<String,Account> getAccounts() {
         Statement stmt = null;
         String encodedPrivateKey = null;
         String encodedPublicKey = null;
@@ -157,10 +169,10 @@ public class Wallet {
         byte[] decodedPrivateKey;
         byte[] decodedPublicKey;
         String sql = "SELECT * FROM ACCOUNTS;";
-        ArrayList<Account> walletAccounts = new ArrayList<Account>();
+        Map<String,Account> walletAccounts = new HashMap<String,Account>();
         
         Connection connection = null;;
-        connection = connect(file.toPath().toAbsolutePath());
+        connection = connect();
         try {
             stmt = connection.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
@@ -176,7 +188,7 @@ public class Wallet {
                     decodedPublicKey = acc.decodeKey(encodedPublicKey);
                     acc.setKeys(decodedPublicKey, decodedPrivateKey);
                     acc.setAlias(alias);
-                    walletAccounts.add(acc);
+                    walletAccounts.put(alias,acc);
                 }
             } catch (SQLException se) {
                 se.printStackTrace();
@@ -195,5 +207,73 @@ public class Wallet {
         }
         
         return walletAccounts;
+    }
+
+    public Account getAccount(String minerAccountAlias) {
+        return accounts.get(minerAccountAlias);
+    }
+    
+    public void saveToWallet(Account account) {
+        PreparedStatement pstmt = null;
+        Connection connection = null;
+        String alias = account.getAlias();
+        byte[] publicKey = account.getPublicKey();
+        byte[] privateKey = account.getPrivateKey();
+        String encodedPublicKey = null;
+        String encodedPrivateKey = null;
+        Path filepath = file.toPath().toAbsolutePath();
+        
+        // Validates account and wallet.
+        if (account == null || filepath == null) {
+            System.out.println("Please create a wallet and an account.");
+            return;
+        }
+        
+        // Validates keys and encodes them.
+        if(publicKey == null || privateKey == null) {
+            return;
+        } else {
+            encodedPublicKey = account.encodeKey(publicKey);
+            encodedPrivateKey = account.encodeKey(privateKey);
+        }
+        
+        // Validates existance of wallet file.
+        if(Files.notExists(filepath)) {
+            System.out.println("Wallet file doesn't exist.");
+            return;
+        }
+
+        //Connection to database.
+        try {
+            connection = connect();
+            System.out.println("Connected to database: "+filepath);
+            pstmt = connection.prepareStatement( "INSERT OR REPLACE INTO ACCOUNTS " +
+                                                 "(PRIVATEKEY, PUBLICKEY, ALIAS,MINERPID,MINERPORT) " + 
+                                                 "VALUES (?,?,?,?,?);");
+            pstmt.setString(1, encodedPrivateKey);
+            pstmt.setString(2, encodedPublicKey);
+            pstmt.setString(3,alias);
+            if ( account.getMinerPid() > 0){
+                pstmt.setInt(4, account.getMinerPid());
+            }else{
+                pstmt.setNull(4, Types.NULL);
+            }
+            if ( account.getMinerPort() > 0){
+                pstmt.setInt(5, account.getMinerPort());
+            }else{
+                pstmt.setNull(5, Types.NULL);
+            }
+            pstmt.executeUpdate();
+            pstmt.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println(e.getMessage());
+        } catch (Exception e) {
+            System.out.println("Error connecting to database: "+e.getMessage());
+            e.printStackTrace();
+        } finally {
+            disconnect(connection);
+            System.out.println("Disconnected from database.");    
+        }
     }
 }
