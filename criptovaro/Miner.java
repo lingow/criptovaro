@@ -160,7 +160,7 @@ public class Miner {
                         failed=true;
                         break;
                     }
-                    
+
                     Block b = new Block();
                     b.addTransactions(peerBlock.getRegularTrans(), this.tm, unspentCache);
                     b.setProof(peerBlock.getProof());
@@ -171,7 +171,7 @@ public class Miner {
                         //The proof is wrong
                         failed=true;
                         break;
-                    }
+    }
                     if (b.compare(peerBlock)){
                         peerBlocks.put(bn, peerBlock);
                     } else {
@@ -200,7 +200,7 @@ public class Miner {
             } 
         }
     }
-
+    
     public synchronized void toggleWork() 
     {
         if(this.interruptWork)
@@ -208,7 +208,7 @@ public class Miner {
         else
             this.interruptWork = true;
     }
-    
+
     private Transaction createPrizeTransaction(byte[] winner) {
         return new Transaction(winner, winner ,BigDecimal.valueOf(100));
     }
@@ -253,12 +253,12 @@ public class Miner {
                 incomingTransactions = this.pool.getAllTransactions();
                         
                 if(incomingTransactions != null)
-                {
+                        {
                     CurrentBlock.addTransactions(incomingTransactions, this.tm, unspentTransCache);
-                    
+                                
                     //If new transaction was added, reset the proof iterator to a new random.
                     currentProof = sr.nextLong();
-                }
+                        }
                         
                 //Done with new transactions, now try to calculate the proof for this block.
                 if(CurrentBlock.getTransactions().size() < 1 )
@@ -520,7 +520,7 @@ public static void main(String[] args)
         {
             // He Wins
             toggleWork();
-        } 
+}
         else if (bchain.getLenght() > peer.getLength())
         {
             // I Win
