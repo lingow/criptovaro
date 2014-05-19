@@ -435,7 +435,7 @@ public class Client {
                                 listTransactions(args);
                                 break;
                             case "transfer funds":
-                                //
+                                //Transfers funds to a buddy.
                                 System.out.println("Transfer funds.");
                                 byte source[] = null;
                                 byte target[] = null;
