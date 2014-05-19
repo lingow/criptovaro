@@ -27,7 +27,7 @@ public class Account
     private byte[] privateKey;
     private byte[] publicKey;
     private KeyPairGenerator kpg = null;
-    private int minerPID = 0;
+    private long minerPID = 0;
     private int minerPort = 0;
     
     public void generateKeys() 
@@ -131,11 +131,11 @@ public class Account
         return decodedKey;
     }
 
-    public int getMinerPid() {
+    public long getMinerPid() {
         return this.minerPID;
     }
 
-    public void setMinerPid(int pid) {
+    public void setMinerPid(long pid) {
         this.minerPID = pid;
     }
 

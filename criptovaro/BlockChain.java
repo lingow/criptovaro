@@ -61,7 +61,11 @@ public class BlockChain {
      * @return current chain's total lenght
      */
     public int getLenght() {
-        return blockChain.peek().getLength();
+        try {
+            return blockChain.peek().getLength();
+        } catch (NullPointerException e) {
+            return 0;
+        }
     }
 
     /**

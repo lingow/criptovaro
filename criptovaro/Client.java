@@ -225,67 +225,55 @@ public class Client {
    
     //Status: Completed
     private boolean startMiner(Account acc, int tcpPort, int httpPort) {
-        int minerPid = 0;
         System.out.println("Starting Criptovaro miner...");
-        Runtime rt = Runtime.getRuntime();
- 
-        BASE64Encoder e = new BASE64Encoder();
-        String encodedPublicKey = e.encode(acc.getPublicKey());
-        String encodedPrivateKey = e.encode(acc.getPrivateKey());
- 
-        Process p = null;
-        String command[] = {
-            "java",
-            "Miner",
-            "-publicKey", encodedPublicKey,
-            "-privateKey", encodedPrivateKey,
-            "-tcp_port", Integer.toString(tcpPort),
-            "-web_port", Integer.toString(httpPort)
-        };
-   
-        try {
-            p = rt.exec(command);
-            p.getErrorStream();
-        } catch (IOException io) {
-            io.printStackTrace();
-            System.out.println("Error starting miner.");
-            return false;
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            System.out.println("Error waiting for process.");
-            return false;
-        } finally {
-            p.destroy();
-        }
+        Miner.INSTANCE.setParams(acc, tcpPort, httpPort);
+        Thread t = new Thread(Miner.INSTANCE);
         acc.setMinerPort(tcpPort);
-        minerPid = obtainMinerPid();
-        if(minerPid!=0) {
-            currentWallet.setMinerPid(acc,minerPid);
-        }
+        t.start();
+        acc.setMinerPid(t.getId());
+        currentWallet.saveToWallet(acc);
         System.out.println("Miner started. Use command stop miner to stop the Criptovaro miner.");
         return true;
     }
    
     //Status: Completed
-    private boolean stopMiner(String accountAlias) {
+    private void stopMiner(String accountAlias) {
         System.out.println("Stoping Criptovaro miner...");
-        Runtime rt = Runtime.getRuntime();
-        Process p = null;
-        int pid = currentWallet.getMinerPid(accountAlias);
-        
-        String command[] = {"kill","-s TERM"+Integer.toString(pid)};
-       
         try {
-            p = rt.exec(command);
-            p.getErrorStream();
-            p.waitFor();
-        } catch (Exception e) {
-            return false;
-        } finally {
-            p.destroy();
+            Thread minerThread = getThreadById(currentWallet.getAccount(accountAlias).getMinerPid());
+            minerThread.interrupt();
+        } catch (NullPointerException e) {
+            System.out.println("No miner found for account " + accountAlias);
+            e.printStackTrace();
         }
-       
-        return true;
+    }
+            
+    public Thread getThreadById(long id) {
+        Thread currentThread = Thread.currentThread();
+        ThreadGroup threadGroup = getRootThreadGroup(currentThread);
+        int allActiveThreads = threadGroup.activeCount();
+        Thread[] allThreads = new Thread[allActiveThreads];
+        threadGroup.enumerate(allThreads);
+
+        for (int i = 0; i < allThreads.length; i++) {
+            Thread thread = allThreads[i];
+            if( thread.getId() == id ){
+                return thread;
+            }
+        }
+        return null;
+    }
+
+    private static ThreadGroup getRootThreadGroup(Thread thread) {
+        ThreadGroup rootGroup = thread.getThreadGroup();
+        while (true) {
+            ThreadGroup parentGroup = rootGroup.getParent();
+            if (parentGroup == null) {
+                break;
+            }
+            rootGroup = parentGroup;
+        }
+        return rootGroup;
     }
  
     public void printTransactionStatus(String args[]) 
@@ -601,8 +589,8 @@ public class Client {
                     String minerAccountAlias = null;
                     byte[] publicKey = null;
                     byte[] privateKey = null;
-                    int tcpPort = 0;
-                    int httpPort = 0;
+                    int tcpPort = 12345;
+                    int httpPort = 80;
                     for (int i = 0; i < args.length - 1; i++) {
                         if (args[i].equalsIgnoreCase("-account")) {
                             minerAccountAlias = args[i + 1];
@@ -649,6 +637,7 @@ public class Client {
                     break;
                 }
             }
+            sc = new Scanner(new InputStreamReader(System.in));
         }
         sc.close();
     }
@@ -676,7 +665,7 @@ public class Client {
     }
    
     private void close() throws IOException {
-        System.out.println("Closing Criptovaro...");
+        System.out.println("Closing Criptovaro client...");
     }
 
     //Status: Completed
@@ -732,7 +721,6 @@ public class Client {
         }
         client.executePrompt(is);
         client.close();
-        System.exit(0);
     }
  
 }

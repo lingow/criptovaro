@@ -49,7 +49,7 @@ import java.util.logging.SimpleFormatter;
 
 import javax.xml.crypto.Data;
 
-public class Miner {
+public class Miner implements Runnable{
     private boolean initialized;
     private Account currentAccount;
     private BlockChain bchain;
@@ -57,11 +57,12 @@ public class Miner {
     private PeerManager pm;
     private TransactionPool pool;
     private boolean interruptWork;
-    private boolean stopMiner = true; //DEBUG: set to false when ready to test for real. We really need an interface to stop a miner.
     static protected Logger LOG;
     private FileHandler logFile;
     private TCPListener listener = null;
     private Httpd webServer = null;
+    private int tcpPort;
+    private int webPort;
 
     /**
      * This attributes makes the miner a singleton
@@ -361,23 +362,15 @@ public class Miner {
             //Listener received a stat message with a longer length. Update block chain.
             Update();
             
-            if(stopMiner)
+            if(Thread.currentThread().isInterrupted())
             {
-                //Print exit message/status
+                LOG.log(Level.INFO, "Shutting Down Miner");
                 break;
             }
         }
         
         LOG.log(Level.FINE, "Exit start method.");
-    }
-
-    //TODO: Who can actually call this method? The only other threads on this jvm process are the state-less http daemon and the tcp listener and since it only reacts to network messages,
-    //it would be a big security flaw to potentially stop the miner as an action to a nw message.
-    public synchronized void stop()
-    {
-        stopMiner = true;
-    }
-    
+    } 
     //TODO: Change all steps of this method to be boolean operations such that if one fais, we can set the flag to false.
     private void init(int tcp_port, int web_port)
     {        
@@ -562,5 +555,16 @@ public static void main(String[] args)
     {
         return pool.getAllTransactions();
 }
+
+    @Override
+    public void run() {
+        start(this.currentAccount,this.tcpPort,this.webPort);
+    }
+    
+    public void setParams(Account acc, int port, int webPort){
+        this.currentAccount=acc;
+        this.tcpPort=port;
+        this.webPort=webPort;
+    }
 }
 
