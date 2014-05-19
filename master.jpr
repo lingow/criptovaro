@@ -84,6 +84,7 @@
             <value n="custom" v="false"/>
             <value n="name" v="Client startMiner"/>
             <value n="programArguments" v="-f criptovaro/tst/startMiner.txt"/>
+            <value n="runActiveFile" v="false"/>
             <url n="runDirectoryURL" path="../"/>
             <url n="targetURL" path="classes/criptovaro/Client.class"/>
          </hash>

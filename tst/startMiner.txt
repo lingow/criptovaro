@@ -1,3 +1,4 @@
 use wallet MyWallet.wallet
 start miner -account Master
+add peer 10.157.197.172 12345
 quit

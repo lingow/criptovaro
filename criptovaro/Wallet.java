@@ -276,4 +276,37 @@ public class Wallet {
             System.out.println("Disconnected from database.");    
         }
     }
+    
+    public void storeBuddy(Buddy b){
+        Connection c = connect();
+        try {
+            PreparedStatement ps = c.prepareStatement("INSERT OR REPLACE INTO BUDDIES (NAME,KEY) VALUES (?,?)");
+            ps.setString(1, b.name);
+            ps.setString(2, b.key);
+            ps.execute();
+            ps.close();
+            disconnect(c);
+        } catch (SQLException e) {
+            System.out.println("Failed to insert buddy");
+            e.printStackTrace();
+        }
+    }
+    
+    public Buddy loadBuddy(String name){
+        Connection c = connect();
+        Buddy b = null;
+        try {
+            PreparedStatement ps = c.prepareStatement("SELECT KEY FROM BUDDIES WHERE NAME = ?");
+            ps.setString(1, b.name);
+            ResultSet rs = ps.executeQuery();
+            while(rs.next()){
+                b = new Buddy(name,rs.getString("KEY"));
+            }
+            ps.close();
+            disconnect(c);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return b;
+    }
 }

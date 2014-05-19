@@ -26,7 +26,7 @@ public class Peer {
     }
 
     public String getIPAddressString() {
-        return iPAddress.toString();
+        return iPAddress.getHostAddress();
     }
 
     Socket createSocket() throws IOException {

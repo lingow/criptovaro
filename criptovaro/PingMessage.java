@@ -7,6 +7,6 @@ public class PingMessage extends Message {
     @Override
     protected boolean deliver(Peer peer) 
     {
-        throw new UnsupportedOperationException();
+        return true;
     }
 }

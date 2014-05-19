@@ -14,6 +14,10 @@ import java.io.InputStreamReader;
 
 import java.io.PrintWriter;
 
+import java.net.InetAddress;
+
+import java.net.UnknownHostException;
+
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -633,6 +637,22 @@ public class Client {
                         System.out.println("Please provide an account alias of which to stop its Miner");
                     }
                     break;
+                case "add peer":
+                    if (args != null){
+                        if (args.length == 2) {
+                            try {
+                                PeerManager.INSTANCE.addPeer(new Peer(InetAddress.getByName(args[0]),
+                                                                      Integer.parseInt(args[1])));
+                            } catch (UnknownHostException e) {
+                                System.out.println("Unknown Host: " + args[0]);
+                            }
+                        } else {
+                            System.out.println("Provide IP and port only please");
+                        }
+                    } else {
+                        System.out.println("Please provide peer information to add");
+                    }
+                break;
                 default:
                     System.out.println("Not a valid command.");
                     break;

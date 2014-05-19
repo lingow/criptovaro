@@ -102,7 +102,12 @@ public class PeerManager {
      * @return the peer object corresponding to passed parameters or null if it was not found
      */
     Peer getPeer(InetAddress inetAddress, int port) {
-        return peerCache.get(new InetSocketAddress(inetAddress,port));
+        Peer p = peerCache.get(new InetSocketAddress(inetAddress,port));
+        if(p == null){
+            p = new Peer(inetAddress,port);
+            addPeer(p);
+        }
+        return p;
     }
 
     /**
