@@ -9,7 +9,9 @@ import java.net.Socket;
 
 import java.net.SocketTimeoutException;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.logging.Level;
 
 /**
@@ -55,7 +57,8 @@ public abstract class Message implements Serializable{
      * @param peers A collection of peers to which this message should be sent.
      */
     public void bcast(){
-        for(Peer p: PeerManager.INSTANCE.getPeers())
+        Collection<Peer> peers= new ArrayList<Peer>(PeerManager.INSTANCE.getPeers());
+        for(Peer p: peers)
         {
             Miner.LOG.log(Level.INFO, "Sending message to peer " + p.getIPAddressString());
             this.send(p);

@@ -199,7 +199,10 @@ public class Miner implements Runnable{
                 // I Win
                 new StatMessage(bchain.getHash(),bchain.getLenght()).bcast();
                 break;
-            } 
+            } else {
+                // it's a tie
+                break;
+            }
         }
     }
     
@@ -247,14 +250,17 @@ public class Miner implements Runnable{
                         CurrentBlock.setPreviousBlock(bchain.getHash());
                         CurrentBlock.setBlockChainPosition(bchain.getLenght() + 1);
                     }
-                    else
-                    CurrentBlock.setPreviousBlock(null);
+                    else{
+                        CurrentBlock.setPreviousBlock(new byte[]{});
+                        CurrentBlock.setBlockChainPosition(0);
+                    }
+                       
                 }
                 
                 //Check if new transactions in the work pool.
                 incomingTransactions = this.pool.getAllTransactions();
                         
-                if(incomingTransactions != null)
+                if(incomingTransactions != null && incomingTransactions.size() > CurrentBlock.getRegularTrans().size())
                 {
                     LOG.log(Level.INFO, "Miner found new transaction. Adding to the current Block.");
                     CurrentBlock.addTransactions(incomingTransactions, this.tm, unspentTransCache);
@@ -374,13 +380,13 @@ public class Miner implements Runnable{
     private void init(int tcp_port, int web_port)
     {        
         LOG.log(Level.INFO, "Entering Miner initialization.");
-        Ledger.INSTANCE.init();
-        
         //Update current block header
         this.bchain = new BlockChain();
      
         //Crate the Transaction Pool
         this.pool = new TransactionPool();
+        
+        this.tm = new TransactionManager();
         
         //Spawn tcp listener
         LOG.log(Level.INFO, "Starting tcp listener in port " + tcp_port);
@@ -391,10 +397,7 @@ public class Miner implements Runnable{
         LOG.log(Level.INFO, "Starting dashboard server in port " + web_port);
         webServer = new Httpd(web_port);
         webServer.start();
-        
-        //Initialize PeerManager
-        PeerManager.INSTANCE.init();
-        
+
         //Set init ready flag
         this.initialized = true;
             
@@ -511,6 +514,10 @@ public static void main(String[] args)
         this.currentAccount=acc;
         this.tcpPort=port;
         this.webPort=webPort;
+    }
+
+    public int getLength() {
+        return bchain.getLenght();
     }
 }
 

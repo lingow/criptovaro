@@ -66,6 +66,7 @@ public class Transaction implements Serializable {
         originTransaction = new byte[]{};
     }
     
+    
     Transaction(ResultSet rs) throws SQLException, IOException {
         BASE64Decoder decoder = new BASE64Decoder();
         

@@ -2,7 +2,7 @@ use wallet MyWallet.wallet
 create account -alias Master
 save account
 start miner -account Master -tcp 12345 -http 8080
-add peer 10.157.197.172 12345
+add peer 127.0.0.1 12345
 create account -alias Secondary
 save account
 create account -alias Savings

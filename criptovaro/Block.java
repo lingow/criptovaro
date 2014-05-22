@@ -35,6 +35,10 @@ public class Block implements Serializable {
     private long blockChainPosition;
     private Transaction prize;
 
+    public Transaction getPrize() {
+        return prize;
+    }
+
     public Block(ResultSet rs) throws IOException, SQLException {
         
         throw new UnsupportedOperationException();
@@ -48,7 +52,7 @@ public class Block implements Serializable {
 
     public boolean addTransaction(Transaction newTran, TransactionManager tm, HashMap<byte[], ArrayList<Transaction>> unspentCache)
     {   
-        if( newTran != null && newTran.getType() == TransactionType.REGULAR && newTran.getAmount().compareTo(BigDecimal.valueOf(0)) <= 0 &&
+        if( newTran != null && newTran.getType() == TransactionType.REGULAR && newTran.getAmount().compareTo(BigDecimal.valueOf(0)) > 0 &&
             !Arrays.equals(newTran.getSource(), newTran.getDestination()))
         {
             boolean validTransaction = false;
@@ -66,45 +70,50 @@ public class Block implements Serializable {
 
             if(destinationFunds == null)
             {
-                sourceFunds = tm.getAccountFunds(newTran.getSource());
+                destinationFunds = tm.getAccountFunds(newTran.getDestination());
                 unspentCache.put(newTran.getDestination(), destinationFunds);
             }
                 
-            BigDecimal reminder = newTran.getAmount();
-            for(Transaction t : sourceFunds)
-            {
-                reminder.subtract(t.getAmount());
-                funds.add(t);
-                if(reminder.compareTo(BigDecimal.valueOf(0)) < 1)
+            if (this.getBlockChainPosition()== 0){
+                //Genesis block
+                validTransaction=true;
+            } else {
+                BigDecimal reminder = newTran.getAmount();
+                for(Transaction t : sourceFunds)
                 {
-                    //We have enough funds. Now need to check if exact amount or change is needed.
-                    if(reminder.compareTo(BigDecimal.valueOf(0)) != 0)
+                    reminder.subtract(t.getAmount());
+                    funds.add(t);
+                    if(reminder.compareTo(BigDecimal.valueOf(0)) < 1)
                     {
-                        Transaction change = new Transaction(newTran.getDestination(), newTran.getSource(), reminder.abs());
-                        change.setOriginTransaction(newTran.getDigitalSignature());
-                        change.setType(TransactionType.CHANGE);
-                        this.transactions.add(change);
+                        //We have enough funds. Now need to check if exact amount or change is needed.
+                        if(reminder.compareTo(BigDecimal.valueOf(0)) != 0)
+                        {
+                            Transaction change = new Transaction(newTran.getDestination(), newTran.getSource(), reminder.abs());
+                            change.setOriginTransaction(newTran.getDigitalSignature());
+                            change.setType(TransactionType.CHANGE);
+                            this.transactions.add(change);
+                        }
+                        
+                        //Mark all the transactions that will fund this transactions as spent and remove them from the unspent cache
+                        for(Transaction f : funds)
+                        {
+                            f.setSpentBy(newTran.getDigitalSignature());
+                            sourceFunds.remove(f);
+                        }
+                        
+                        //We are done!
+                        validTransaction = true;
+                        break;
                     }
-                    
-                    //Mark all the transactions that will fund this transactions as spent and remove them from the unspent cache
-                    for(Transaction f : funds)
-                    {
-                        f.setSpentBy(newTran.getDigitalSignature());
-                        sourceFunds.remove(f);
-                    }
-                    
-                    //We are done!
-                    validTransaction = true;
-                    break;
                 }
             }
-            
-            
+
             //The transaction is golden. Added to the current block.
             if(validTransaction)
             {
                 //Update the unspent trans cache for the recipient of this transaction
-                unspentCache.get(newTran.getDestination()).add(newTran);
+                //unspentCache.get(newTran.getDestination()).add(newTran);
+                destinationFunds.add(newTran);
                 this.transactions.add(newTran); //Add the Transaction itself
                 this.transactions.addAll(funds); //Add the inputs and outputs
                 return true;
@@ -195,7 +204,11 @@ public class Block implements Serializable {
 
     public byte[] getPreviousBlockHash() 
     {
-        return previousBlock;
+        if (blockChainPosition == 0){
+            return new byte[]{};
+        } else {
+            return previousBlock;
+        }
     }
 
     public void setPreviousBlock(byte[] previousBlock) 
@@ -231,7 +244,13 @@ public class Block implements Serializable {
 
     public Collection<Transaction> getRegularTrans() 
     {
-        throw new UnsupportedOperationException();
+        Collection<Transaction> res = new ArrayList<Transaction>();
+        for ( Transaction t : transactions){
+            if (t.getType()== TransactionType.REGULAR){
+                res.add(t);
+            }
+        }
+        return res;
     }
     
     void setPrizeTransaction(Transaction prize) 

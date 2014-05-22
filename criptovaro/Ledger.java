@@ -35,8 +35,6 @@ public class Ledger {
         ", LENGTH NUMBER NOT NULL \n" + 
         ", SOLVERPUBLICKEY VARCHAR(1024) NOT NULL \n" + 
         ", PROOF NUMBER NOT NULL \n" + 
-        "    REFERENCES BLOCKS ( BLOCK_ID )\n" + 
-        "     \n" + 
         ", CONSTRAINT BLOCKS_PK PRIMARY KEY ( BLOCK_ID ) \n" + 
         ", CONSTRAINT BLOCKS_UNIQUE_LENGTH UNIQUE ( LENGTH ) \n" + 
         ");\n" , 

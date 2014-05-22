@@ -91,7 +91,7 @@ public class PeerManager {
      * Retrieves the collection of known peers.
      * @return a collection of all the peers in the peerCache
      */
-    public Collection<Peer> getPeers() {
+    public synchronized Collection<Peer> getPeers() {
         return peerCache.values();
     }
 
@@ -117,26 +117,17 @@ public class PeerManager {
     {
         Peer result = null;
         Random r = new Random();
+        result = new Peer(null, Miner.INSTANCE.getLength());
         
-        try 
+        for(Peer p : peerCache.values())
         {
-            result = new Peer(InetAddress.getLocalHost(), -1);
-           
-            for(Peer p : peerCache.values())
+            if(p.getLength() >= result.getLength())
             {
-                if(p.getLength() >= result.getLength())
+                if(r.nextInt(1) == 1 || result.getLength() == -1)
                 {
-                    if(r.nextInt(1) == 1 || result.getLength() == -1)
-                    {
-                        result = p;
-                    }
+                    result = p;
                 }
             }
-        } 
-        catch (UnknownHostException e) 
-        {
-            Miner.LOG.log(Level.INFO, e.toString());
-            e.printStackTrace();
         }
         return result;
     }

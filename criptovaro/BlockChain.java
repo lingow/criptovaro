@@ -72,7 +72,11 @@ public class BlockChain {
      * @return the last block's hash in this block chain
      */
     public byte[] getHash() {
-        return blockChain.peek().getHash();
+        try {
+            return blockChain.peek().getHash();
+        } catch (NullPointerException e) {
+            return null;
+        }
     }
 
     /**

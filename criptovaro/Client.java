@@ -53,7 +53,8 @@ public class Client {
     
     private void init() throws IOException 
     {
-        PeerManager.INSTANCE.init();    
+        Ledger.INSTANCE.init();
+        PeerManager.INSTANCE.init();
     }
     
     //Status: Completed
@@ -502,8 +503,12 @@ public class Client {
                         System.out.println("Please enter a valid amount.");
                         break;
                     }
-
-                    transferFunds(currentWallet.getAccount(new String(source)), target, amount);
+                    Account getAcc = currentWallet.getAccount(new String(source));
+                    if (getAcc == null){
+                        System.out.println("No such Account");
+                    } else {
+                        transferFunds(getAcc, target, amount);
+                    }
                     break;
                 case "start miner":
                     String minerAccountAlias = null;

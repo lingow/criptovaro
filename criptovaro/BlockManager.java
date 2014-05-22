@@ -13,6 +13,7 @@ import java.sql.Time;
 
 import java.sql.Timestamp;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.logging.Level;
 
@@ -67,6 +68,8 @@ public class BlockManager
             pstmt = conn.prepareStatement(insertTrans);
             
             //iterate on all transactions
+            ArrayList<Transaction> arr = new ArrayList<Transaction>(b.getTransactions());
+            arr.add(b.getPrize());
             for(Transaction t : b.getTransactions())
             {
                 pstmt.setString(1, encoder.encode(b.getHash()));
@@ -104,6 +107,8 @@ public class BlockManager
         catch(SQLException e)
         {
             Miner.LOG.log(Level.INFO, e.toString());
+            e.printStackTrace();
+        } catch (Exception e){
             e.printStackTrace();
         }
         finally
